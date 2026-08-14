@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 44" fill="none">
+  <!-- A1: Pointed apex, open bottom, no crossbar -->
+  <path d="M4 33L17 7L30 33" stroke="#13A3AF" stroke-width="5.2" stroke-linecap="square" stroke-linejoin="miter"/>
+  <!-- V: Valley open at top -->
+  <path d="M28 7L41 33L54 7" stroke="#13A3AF" stroke-width="5.2" stroke-linecap="square" stroke-linejoin="miter"/>
+  <!-- A2: Pointed apex, open bottom, no crossbar -->
+  <path d="M52 33L65 7L78 33" stroke="#13A3AF" stroke-width="5.2" stroke-linecap="square" stroke-linejoin="miter"/>
+  <!-- N: Bold blocky letterform, squared terminals -->
+  <path d="M86 33V7L106 33V7" stroke="#13A3AF" stroke-width="5.2" stroke-linecap="square" stroke-linejoin="miter"/>
+  <!-- T: Bold blocky letterform, squared terminals -->
+  <path d="M112 7H136M124 7V33" stroke="#13A3AF" stroke-width="5.2" stroke-linecap="square"/>
+  <!-- i: Lowercase, shorter stem, separated dot, solid #13A3AF -->
+  <path d="M144 15V33" stroke="#13A3AF" stroke-width="5.2" stroke-linecap="square"/>
+  <circle cx="144" cy="7" r="3" fill="#13A3AF"/>
+  <!-- S: Squared terminals, bold geometric curvature -->
+  <path d="M178 13C178 9 171 7 164 7C157 7 154 10 154 13.5C154 20.5 178 18 178 26.5C178 33 166 33.5 157 33.5C150 33.5 147 31 147 27.5" stroke="#13A3AF" stroke-width="5.2" stroke-linecap="square"/>
+  <!-- Subtitle: Product of Zimbabwe in lighter muted teal (#98D3D8) -->
+  <text x="40" y="42" fill="#98D3D8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Plus Jakarta Sans', sans-serif" font-weight="600" font-size="8.5" letter-spacing="2.2">PRODUCT OF ZIMBABWE</text>
+</svg>

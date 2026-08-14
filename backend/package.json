@@ -1,0 +1,14 @@
+{
+  "name": "avantis-support-backend",
+  "version": "1.0.0",
+  "description": "Avantis Cloud Backend API & PostgreSQL Database Engine",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "cors": "^2.8.5",
+    "pg": "^8.13.1"
+  }
+}

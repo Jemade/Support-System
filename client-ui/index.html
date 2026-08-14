@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avantis Hardware Support</title>
+  <meta name="description" content="Avantis Hardware Support — Comprehensive hardware diagnostics, driver updates, and health telemetry for Avantis laptops, desktops, tablets, and all-in-ones.">
+  <!-- Favicon: AV Monogram Badge -->
+  <link rel="icon" type="image/svg+xml" href="assets/avantis-icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ===== APP HEADER ===== -->
+  <header class="app-header">
+    <div class="header-left">
+      <!-- Exact AVANTiS Wordmark Image Asset -->
+      <a href="#home" class="avantis-brand-link" onclick="switchTab('home')">
+        <img src="assets/avantis-logo.svg" alt="AVANTiS - Product of Zimbabwe" class="avantis-logo-img">
+      </a>
+    </div>
+
+    <div class="header-right">
+      <div class="agent-status-container">
+        <div class="status-live-dot" id="status-live-dot"></div>
+        <span id="agent-status-time">Last checked: Just now</span>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="openQaChecklistModal()" title="Cross-Product Hardware QA Matrix">
+        Device Compatibility
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== TOP TABS NAVIGATION ===== -->
+  <nav class="tab-nav" id="tab-nav">
+    <button class="tab-btn active" data-tab="home">Home</button>
+    <button class="tab-btn" data-tab="troubleshoot">Troubleshoot</button>
+    <button class="tab-btn" data-tab="drivers">Drivers</button>
+    <button class="tab-btn" data-tab="history">History</button>
+  </nav>
+
+  <!-- ===== MAIN GRID LAYOUT ===== -->
+  <div class="main-grid">
+    <div class="main-column">
+
+      <!-- ==================== TAB 1: HOME ==================== -->
+      <div class="tab-content active" id="tab-home">
+
+        <!-- Active Alerts (with guided next steps) -->
+        <div class="alerts-container" id="alerts-container"></div>
+
+        <!-- Hero Primary Action Area -->
+        <div class="hero-scan">
+          <div class="health-ring-wrap">
+            <svg viewBox="0 0 90 90">
+              <circle class="ring-bg" cx="45" cy="45" r="37.5" />
+              <circle class="ring-fill" id="health-ring" cx="45" cy="45" r="37.5"
+                stroke-dasharray="235.6"
+                stroke-dashoffset="235.6" />
+            </svg>
+            <div class="health-score-num" id="health-score">—</div>
+          </div>
+          <div class="hero-info">
+            <h1 class="hero-title" id="hero-title">System Health & Diagnostics</h1>
+            <div class="hero-subtitle" id="hero-subtitle">All hardware components operating within normal baseline parameters.</div>
+            <div class="hero-actions">
+              <button class="btn btn-primary" id="btn-scan" onclick="runScan()">
+                Run Diagnostic Check
+              </button>
+              <button class="btn btn-secondary" id="btn-cleanup" onclick="runCleanupScan()">
+                Clean Temp Files
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hardware Health Metrics Grid -->
+        <div>
+          <div class="section-header">Hardware Health & Telemetry</div>
+          <div class="metrics-grid">
+            <!-- CPU Card -->
+            <div class="metric-card" id="metric-card-cpu">
+              <div class="metric-label">
+                <span>Processor</span>
+                <span class="metric-badge metric-badge--healthy" id="cpu-temp-badge">45°C</span>
+              </div>
+              <div class="metric-value" id="cpu-load-val">0%</div>
+              <div class="metric-detail" id="cpu-detail">Normal operating temperature</div>
+              <div class="progress-track">
+                <div class="progress-fill" id="cpu-bar" style="width:0%"></div>
+              </div>
+            </div>
+
+            <!-- Memory Card -->
+            <div class="metric-card" id="metric-card-ram">
+              <div class="metric-label">
+                <span>Memory</span>
+                <span class="mono" id="ram-spec" style="font-size:11px; color: var(--text-faint)">DDR</span>
+              </div>
+              <div class="metric-value" id="ram-val">0%</div>
+              <div class="metric-detail" id="ram-detail">0 GB used of 0 GB total</div>
+              <div class="progress-track">
+                <div class="progress-fill" id="ram-bar" style="width:0%"></div>
+              </div>
+            </div>
+
+            <!-- Storage Card -->
+            <div class="metric-card" id="metric-card-storage">
+              <div class="metric-label">
+                <span id="storage-title">Storage (C:)</span>
+                <span class="metric-badge metric-badge--healthy" id="smart-badge">SMART Passed</span>
+              </div>
+              <div class="metric-value" id="storage-val">0%</div>
+              <div class="metric-detail" id="storage-detail">0 GB free of 0 GB</div>
+              <div class="progress-track">
+                <div class="progress-fill" id="storage-bar" style="width:0%"></div>
+              </div>
+            </div>
+
+            <!-- Power Card (Dynamically adapts: Battery on laptops/tablets, AC PSU on desktops/AIO) -->
+            <div class="metric-card" id="metric-card-power">
+              <div class="metric-label">
+                <span id="power-card-title">Power Supply</span>
+                <span id="power-status-badge" class="metric-badge metric-badge--healthy">AC Power</span>
+              </div>
+              <div class="metric-value" id="battery-val">100%</div>
+              <div class="metric-detail" id="power-detail">Connected to AC mains</div>
+              <div class="progress-track">
+                <div class="progress-fill" id="battery-bar" style="width:100%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Threat Detection / Security Status Strip -->
+        <div class="security-bar" id="security-bar">
+          <div class="security-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <div class="security-info">
+            <div class="security-title">Windows Defender Antivirus Protection</div>
+            <div class="security-detail" id="security-detail">Active real-time protection · No security threats detected</div>
+          </div>
+          <div class="security-status-badge" id="security-status">Active</div>
+        </div>
+
+        <!-- Contextual Performance Insights -->
+        <div class="tips-section" id="tips-section">
+          <div class="section-header" style="margin-bottom:8px">Performance Tuning & Insights</div>
+          <div id="tips-list">
+            <div class="tip-item">
+              <span class="tip-icon">⚡</span>
+              <span>All systems operating optimally. Background monitoring service active.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================== TAB 2: TROUBLESHOOT ==================== -->
+      <div class="tab-content" id="tab-troubleshoot">
+        <div class="troubleshoot-header">
+          <div>
+            <h2>Isolated Component Tests</h2>
+            <p style="font-size:13px; color:var(--text-muted); margin-top:2px;">Targeted on-demand diagnostic checks per hardware subsystem.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btn-full-test" onclick="runAllTests()">
+            Run Full System Diagnostics
+          </button>
+        </div>
+
+        <div class="test-cards">
+          <!-- 1. Processor (CPU) Test Card with Cohesive Chip Outline Icon -->
+          <div class="test-card" id="test-card-cpu">
+            <div class="test-card-header">
+              <div class="hw-icon-container">
+                <svg viewBox="0 0 24 24">
+                  <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                  <rect x="9" y="9" width="6" height="6"></rect>
+                  <path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"></path>
+                </svg>
+              </div>
+              <div class="test-card-title">Processor (CPU)</div>
+            </div>
+            <div class="test-card-desc">Thermal load stress test — verifies clock stability and core heat dissipation under stress.</div>
+            <div class="test-card-footer">
+              <button class="btn btn-secondary btn-sm" onclick="runComponentTest('cpu')">Run CPU Test</button>
+            </div>
+            <div id="test-result-cpu"></div>
+          </div>
+
+          <!-- 2. Memory (RAM) Test Card with Cohesive RAM Stick Outline Icon -->
+          <div class="test-card" id="test-card-memory">
+            <div class="test-card-header">
+              <div class="hw-icon-container">
+                <svg viewBox="0 0 24 24">
+                  <path d="M2 7h20v10H2z"></path>
+                  <path d="M6 10h2v4H6zM11 10h2v4h-2zM16 10h2v4h-2z"></path>
+                  <path d="M4 17v2M8 17v2M12 17v2M16 17v2M20 17v2"></path>
+                </svg>
+              </div>
+              <div class="test-card-title">Memory (RAM)</div>
+            </div>
+            <div class="test-card-desc">Memory integrity verification — tests read/write fidelity and address bank parity.</div>
+            <div class="test-card-footer">
+              <button class="btn btn-secondary btn-sm" onclick="runComponentTest('memory')">Run RAM Test</button>
+            </div>
+            <div id="test-result-memory"></div>
+          </div>
+
+          <!-- 3. Storage Drive Test Card with Cohesive Drive Outline Icon -->
+          <div class="test-card" id="test-card-storage">
+            <div class="test-card-header">
+              <div class="hw-icon-container">
+                <svg viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                  <line x1="7" y1="12" x2="17" y2="12"></line>
+                  <line x1="7" y1="8" x2="12" y2="8"></line>
+                  <circle cx="17" cy="16" r="1" fill="currentColor"></circle>
+                </svg>
+              </div>
+              <div class="test-card-title">Primary Storage (SSD/NVMe)</div>
+            </div>
+            <div class="test-card-desc">Drive health verification — evaluates SMART parameters, reallocated sectors, and write life.</div>
+            <div class="test-card-footer">
+              <button class="btn btn-secondary btn-sm" onclick="runComponentTest('storage')">Run Drive Test</button>
+            </div>
+            <div id="test-result-storage"></div>
+          </div>
+
+          <!-- 4. Power / Battery Test Card with Cohesive Power Outline Icon -->
+          <div class="test-card" id="test-card-power">
+            <div class="test-card-header">
+              <div class="hw-icon-container">
+                <svg viewBox="0 0 24 24" id="power-test-icon">
+                  <rect x="2" y="7" width="16" height="10" rx="2"></rect>
+                  <line x1="20" y1="10" x2="20" y2="14"></line>
+                  <line x1="6" y1="11" x2="6" y2="13"></line>
+                  <line x1="10" y1="11" x2="10" y2="13"></line>
+                </svg>
+              </div>
+              <div class="test-card-title" id="power-test-title">Power Supply & Battery</div>
+            </div>
+            <div class="test-card-desc" id="power-test-desc">Battery diagnostics — analyzes full design capacity degradation and AC line stability.</div>
+            <div class="test-card-footer">
+              <button class="btn btn-secondary btn-sm" id="btn-run-power-test" onclick="runComponentTest('power')">Run Power Test</button>
+            </div>
+            <div id="test-result-power"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TAB 3: DRIVERS ==================== -->
+      <div class="tab-content" id="tab-drivers">
+        <div class="drivers-header">
+          <div>
+            <h2>Avantis Driver Updates</h2>
+            <p style="font-size:13px; color:var(--text-muted); margin-top:2px;">Official verified drivers tailored for your specific Avantis model.</p>
+          </div>
+          <div class="drivers-actions">
+            <button class="btn btn-secondary btn-sm" id="btn-check-drivers" onclick="checkDriverUpdates()">
+              Check for Updates
+            </button>
+            <button class="btn btn-primary btn-sm" id="btn-update-all" onclick="updateAllDrivers()" style="display:none">
+              Update All Drivers
+            </button>
+          </div>
+        </div>
+
+        <div class="driver-list" id="driver-list">
+          <div class="driver-item-header">
+            <div style="display:grid; grid-template-columns: 1.4fr 120px 120px 110px 150px; gap:12px; width:100%">
+              <span>Hardware Component</span>
+              <span>Installed Version</span>
+              <span>Latest Available</span>
+              <span>Status</span>
+              <span>Action</span>
+            </div>
+          </div>
+          <div id="driver-list-body">
+            <div class="empty-state">
+              <div class="empty-state-icon">📦</div>
+              <div>Click "Check for Updates" to query the Avantis Driver Catalog for this device model.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="driver-note">
+          <!-- Backend driver catalog integration seam: GET /api/drivers/{modelId} -->
+          <strong>Avantis Driver Catalog:</strong> All updates are verified by Avantis Technologies quality assurance for stability, thermal performance, and battery efficiency.
+        </div>
+      </div>
+
+      <!-- ==================== TAB 4: HISTORY ==================== -->
+      <div class="tab-content" id="tab-history">
+        <div class="history-header">
+          <div>
+            <h2>Device Diagnostic Report</h2>
+            <p style="font-size:13px; color:var(--text-muted); margin-top:2px;">Complete diagnostic telemetry log for technical support escalation.</p>
+          </div>
+          <div class="history-actions">
+            <button class="btn btn-secondary btn-sm" onclick="downloadReport()">
+              Download HTML Report
+            </button>
+            <button class="btn btn-ghost btn-sm" onclick="copyReportText()">
+              Copy Plain Text
+            </button>
+          </div>
+        </div>
+
+        <!-- Device Summary Card -->
+        <div class="report-section">
+          <div class="report-section-title">Hardware Profile Summary</div>
+          <div class="report-device-info" id="report-device-info">
+            <div class="report-field">
+              <span class="report-field-label">Model: </span>
+              <span class="report-field-value" id="report-model">—</span>
+            </div>
+            <div class="report-field">
+              <span class="report-field-label">Serial Number: </span>
+              <span class="report-field-value mono" id="report-serial">—</span>
+            </div>
+            <div class="report-field">
+              <span class="report-field-label">Operating System: </span>
+              <span class="report-field-value" id="report-os">—</span>
+            </div>
+            <div class="report-field">
+              <span class="report-field-label">Processor: </span>
+              <span class="report-field-value" id="report-cpu">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scan History Table -->
+        <div class="report-section">
+          <div class="report-section-title">Diagnostic History Log</div>
+          <div class="scan-history-list" id="scan-history-list">
+            <div class="empty-state">
+              <div class="empty-state-icon">📋</div>
+              <div>No scans recorded yet. Run a diagnostic scan to start logging your hardware telemetry timeline.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Health Timeline -->
+        <div class="report-section">
+          <div class="report-section-title">Health History Timeline</div>
+          <div class="health-timeline" id="health-timeline">
+            <div style="color: var(--text-muted); font-size: 13px;">Timeline will populate automatically as diagnostic scans run.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== SIDEBAR COLUMN ===== -->
+    <aside class="side-column">
+
+      <!-- System Specifications -->
+      <div class="specs-panel">
+        <div class="section-header">Device Specifications</div>
+        <div class="spec-list">
+          <div class="spec-item">
+            <span class="spec-label">Model</span>
+            <span class="spec-val" id="spec-model">Loading...</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Serial</span>
+            <span class="spec-val mono" id="spec-serial">Loading...</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Operating System</span>
+            <span class="spec-val" id="spec-os">Loading...</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Processor</span>
+            <span class="spec-val" id="spec-cpu">Loading...</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Memory</span>
+            <span class="spec-val" id="spec-ram">Loading...</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Device Type</span>
+            <span class="spec-val" id="spec-device-type">Detecting...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Diagnostic Report Card -->
+      <div class="report-card">
+        <div class="report-card-tag">Diagnostic Report</div>
+        <div class="report-card-desc">Generate or export a diagnostic report of your device's health history for support escalation.</div>
+        <button class="report-card-link" onclick="switchTab('history')">
+          <span>View Diagnostic Report</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Direct Support Ticket Button -->
+      <button class="btn btn-secondary" style="width:100%" onclick="openTicketModal()">
+        Submit Support Request
+      </button>
+
+    </aside>
+  </div>
+
+  <!-- ===== FLOATING AVANTIS AGENT ASSISTANT BUTTON ===== -->
+  <div class="av-floating-assistant" id="floating-assistant-btn" onclick="toggleAssistantChat(event)" title="Avantis Support Assistant — Background monitoring active">
+    <div class="assistant-badge-dot"></div>
+    <img src="assets/avantis-icon.svg" alt="AV" class="assistant-btn-icon">
+  </div>
+
+  <!-- ===== AVANTIS ASSISTANT CHAT PANEL (ANCHORED BOTTOM-RIGHT) ===== -->
+  <div class="assistant-chat-panel" id="assistant-chat-panel" onclick="event.stopPropagation()">
+    <!-- 1. Header row: AV icon, title, active dot -->
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <img src="assets/avantis-icon.svg" alt="AV" class="chat-header-avatar">
+        <span class="chat-header-title">Avantis Assistant</span>
+      </div>
+      <div class="chat-header-status">
+        <span class="chat-status-dot"></span>
+        <span>Active</span>
+      </div>
+    </div>
+
+    <!-- 2. Scrollable message area -->
+    <div class="chat-body" id="chat-messages-container">
+      <div class="chat-messages-list" id="chat-messages-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- 3. Bottom text input & send button -->
+    <form class="chat-input-bar" id="chat-input-form" onsubmit="handleChatSubmit(event)">
+      <input type="text" id="chat-input-field" class="chat-input" placeholder="Type a message or question..." autocomplete="off" />
+      <button type="submit" class="chat-send-btn" id="chat-send-btn" title="Send message">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </form>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="app-footer">
+    <div class="footer-left">
+      <!-- Exact AVANTiS Wordmark Image Asset -->
+      <div class="avantis-brand-link">
+        <img src="assets/avantis-logo.svg" alt="AVANTiS - Product of Zimbabwe" class="avantis-logo-footer-img">
+      </div>
+    </div>
+    <div class="footer-right">v2.2 · Avantis Hardware Support & Diagnostics</div>
+  </footer>
+
+  <!-- ===== MODAL 1: SUPPORT TICKET ===== -->
+  <div class="modal-overlay" id="ticket-modal">
+    <div class="modal-card">
+      <h3 class="modal-title">Submit Technical Support Request</h3>
+      <p class="modal-desc">Describe your issue. Full hardware telemetry will be attached automatically.</p>
+      <form id="ticket-form" onsubmit="submitTicket(event)">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" id="cust-name" class="form-input" placeholder="e.g. Tendai Moyo" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="cust-email" class="form-input" placeholder="tendai@company.co.zw" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Issue Description</label>
+          <textarea id="cust-issue" class="form-textarea" placeholder="What symptoms or error messages are you seeing?" required></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('ticket-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-tck">Submit Support Ticket</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== MODAL 2: SYSTEM CLEANUP ===== -->
+  <div class="modal-overlay" id="cleanup-confirm-modal">
+    <div class="modal-card">
+      <h3 class="modal-title">Avantis System Cleanup</h3>
+      <p class="modal-desc" id="cleanup-confirm-msg">Scanning for temporary files and caches...</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('cleanup-confirm-modal')">Cancel</button>
+        <button type="button" class="btn btn-primary" id="btn-confirm-cleanup" onclick="executeCleanup()">Clean Files Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL 4: QA CROSS-PRODUCT COMPATIBILITY CHECKLIST ===== -->
+  <div class="modal-overlay" id="qa-modal">
+    <div class="modal-card" style="max-width:600px;">
+      <h3 class="modal-title">Cross-Product QA Compatibility Matrix</h3>
+      <p class="modal-desc">Automated internal verification checklist for new Avantis hardware models.</p>
+      
+      <div style="display:flex; flex-direction:column; gap:8px; font-size:13px; margin-bottom:20px;" id="qa-checklist-items">
+        <div style="padding:8px 12px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; display:flex; justify-content:space-between;">
+          <span>✓ Dynamic Model & Serial Detection</span>
+          <strong id="qa-chk-model" style="color:var(--avantis-teal-cta)">Verified</strong>
+        </div>
+        <div style="padding:8px 12px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; display:flex; justify-content:space-between;">
+          <span>✓ Thermal Sensor & Graceful Degradation</span>
+          <strong id="qa-chk-temp" style="color:var(--avantis-teal-cta)">Supported</strong>
+        </div>
+        <div style="padding:8px 12px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; display:flex; justify-content:space-between;">
+          <span>✓ Power Mode (Battery vs AC PSU)</span>
+          <strong id="qa-chk-power" style="color:var(--avantis-teal-cta)">Auto-Adapted</strong>
+        </div>
+        <div style="padding:8px 12px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; display:flex; justify-content:space-between;">
+          <span>✓ Storage SMART & Sector Verification</span>
+          <strong id="qa-chk-storage" style="color:var(--avantis-teal-cta)">Active</strong>
+        </div>
+        <div style="padding:8px 12px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; display:flex; justify-content:space-between;">
+          <span>✓ Troubleshoot Subsystem Isolation</span>
+          <strong id="qa-chk-troubleshoot" style="color:var(--avantis-teal-cta)">Ready</strong>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-primary" onclick="closeModal('qa-modal')">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL 5: NOTIFICATION INFO ===== -->
+  <div class="modal-overlay" id="info-modal">
+    <div class="modal-card">
+      <h3 class="modal-title" id="info-modal-title">Notification</h3>
+      <p class="modal-desc" id="info-modal-msg"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-primary" onclick="closeModal('info-modal')">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="src/app.js"></script>
+</body>
+</html>

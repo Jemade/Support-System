@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: avantis_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-avantis_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: avantis_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: 9141
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-avantis_db}
+    ports:
+      - "9141:9141"
+
+  agent:
+    build:
+      context: ./agent
+      dockerfile: Dockerfile
+    container_name: avantis_agent
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      PORT: 9140
+      BACKEND_URL: http://backend:9141
+    ports:
+      - "9140:9140"
+
+  client-ui:
+    build:
+      context: ./client-ui
+      dockerfile: Dockerfile
+    container_name: avantis_client_ui
+    restart: unless-stopped
+    depends_on:
+      - agent
+    environment:
+      PORT: 9142
+    ports:
+      - "9142:9142"
+
+  support-dashboard:
+    build:
+      context: ./support-dashboard
+      dockerfile: Dockerfile
+    container_name: avantis_support_dashboard
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      PORT: 9143
+    ports:
+      - "9143:9143"
+
+volumes:
+  postgres_data:
+    driver: local
