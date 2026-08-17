@@ -1,6 +1,6 @@
 /**
  * AVANTIS PC ASSIST: GEMINI AI INTEGRATION SERVICE
- * Free-tier optimized with deterministic grounding, retry logic, and offline fallbacks.
+ * Flexible, conversational, and strictly grounded in real telemetry (Zero Hallucination).
  */
 
 const https = require('https');
@@ -47,7 +47,7 @@ class GeminiService {
         }
       ],
       generationConfig: {
-        temperature: 0.2, // Low temperature for factual precision
+        temperature: 0.3, // Balanced for conversational tone + factual precision
         maxOutputTokens: 600
       }
     });
@@ -75,7 +75,6 @@ class GeminiService {
               reject(new Error(`Failed to parse Gemini response: ${err.message}`));
             }
           } else if ((res.statusCode === 429 || res.statusCode === 503) && retries > 0) {
-            // Switch model or back off
             const nextModelIdx = (modelIndex + 1) % MODELS.length;
             setTimeout(async () => {
               try {
@@ -104,24 +103,13 @@ class GeminiService {
 
   /**
    * Part 1: Foreground Chat Assistant
-   * Strictly grounded in latest scan report + live telemetry.
+   * Natural, flexible, and strictly grounded in real telemetry (Zero Hallucination).
    */
   async askAssistant(userQuestion, scanData = null, liveDiagnostics = null) {
-    // 1. Refuse obvious off-topic prompts to preserve quota
-    const qLower = userQuestion.toLowerCase().trim();
-    const offTopicKeywords = ['poem', 'joke', 'recipe', 'song', 'story', 'essay', 'code in python', 'write code', 'who are you outside'];
-    if (offTopicKeywords.some(kw => qLower.includes(kw)) && !qLower.includes('pc') && !qLower.includes('computer') && !qLower.includes('scan') && !qLower.includes('hardware')) {
-      return "I am Avantis PC Assist, your dedicated diagnostic and PC health assistant. I can only assist with questions regarding your computer's health, hardware telemetry, driver updates, virus scans, and performance optimization.";
-    }
-
-    // 2. If no scan data is present
-    if (!scanData && !liveDiagnostics) {
-      return "No system scans or hardware telemetry have been recorded yet. Please run a Full System Scan or Scan Hardware from the dashboard so I can accurately analyze your PC.";
-    }
-
     // Construct grounded context
     const contextObj = {
       liveSensors: liveDiagnostics ? {
+        cpuModel: liveDiagnostics.system?.cpuModel,
         cpuLoadPercent: liveDiagnostics.cpu?.loadPercent,
         cpuTempC: liveDiagnostics.cpu?.temperatureC,
         ramUsedPercent: liveDiagnostics.memory?.usedPercent,
@@ -129,9 +117,11 @@ class GeminiService {
         ramTotalGB: liveDiagnostics.memory?.totalGB,
         storageUsedPercent: liveDiagnostics.storage?.usedPercent,
         storageFreeGB: liveDiagnostics.storage?.freeGB,
+        storageType: liveDiagnostics.storage?.driveType,
         storageSmart: liveDiagnostics.storage?.smartStatus,
         batteryPercent: liveDiagnostics.battery?.currentPercent,
-        batteryHealth: liveDiagnostics.battery?.healthPercent
+        batteryHealth: liveDiagnostics.battery?.healthPercent,
+        batteryHasBattery: liveDiagnostics.battery?.hasBattery
       } : null,
       lastFullScan: scanData ? {
         generatedAt: scanData.generatedAt,
@@ -150,12 +140,14 @@ class GeminiService {
       } : null
     };
 
-    const systemPrompt = `You are Avantis PC Assist AI, a technical diagnostic assistant for Avantis computers (Product of Zimbabwe).
-Your instructions:
-1. ONLY answer using the provided CONTEXT JSON. Never invent hardware specs, CPU temperatures, threat names, or statistics not present in CONTEXT.
-2. If the user asks about a component not in CONTEXT (e.g. GPU temperature or second SSD), explicitly state that this data is not in the current report and recommend running the appropriate diagnostic scan.
-3. If threats were found in Threat Scan, explain the threat name, confirm whether it was auto-remediated/quarantined, and advise if any action is needed in plain English.
-4. Keep answers concise, technical, and helpful (1-3 short paragraphs).`;
+    const systemPrompt = `You are Avantis PC Assist, an intelligent, helpful, and friendly PC diagnostic and optimization assistant for Avantis computers (Product of Zimbabwe).
+
+Guidelines:
+1. Conversational & Flexible: Be natural, polite, and helpful. You can answer general questions about computing, Windows maintenance tips, troubleshooting advice, and system optimization recommendations freely and intelligently.
+2. Grounded on Real Hardware (No Hallucination): When the user asks about THIS specific computer's current health, temperatures, load, memory, disk, drivers, or malware scan results, you MUST strictly use the data in the CONTEXT JSON. Never fabricate or guess hardware numbers, temperatures, threat names, or component counts not found in CONTEXT.
+3. Component Transparency: If the user asks about a component or metric that is NOT in CONTEXT (such as a dedicated GPU or external drive), explain that this data is not in the current diagnostic snapshot and suggest running "Scan Hardware" or "Full System Scan" from the dashboard.
+4. Security & Actionable Advice: If threats are detected in CONTEXT, explain what was found and whether it was auto-quarantined. Recommend relevant dashboard actions (Full System Scan, Update Drivers, Clean Up Files, Optimize Network, Threat Scan) when appropriate.
+5. Keep your tone professional, direct, and easy to understand.`;
 
     const prompt = `${systemPrompt}\n\nCONTEXT JSON:\n${JSON.stringify(contextObj, null, 2)}\n\nUSER QUESTION:\n${userQuestion}`;
 
@@ -175,13 +167,17 @@ Your instructions:
     const ls = ctx.liveSensors || {};
     const fs = ctx.lastFullScan || {};
 
+    if (q.includes('hello') || q.includes('hi') || q.includes('hey') || q.includes('who are you') || q.includes('help')) {
+      return "Hello! I'm Avantis Assist. I can help you monitor your computer's health, check processor and memory usage, inspect disk space, explain security scans, and optimize system performance. How can I assist you today?";
+    }
+
     if (q.includes('gpu') || q.includes('graphics') || q.includes('video card')) {
       return "Dedicated GPU telemetry is not present in the current diagnostic report. To monitor your GPU and other hardware components, please run the 'Scan Hardware' module.";
     }
 
     if (q.includes('cpu') || q.includes('processor') || (q.includes('temp') && !q.includes('gpu'))) {
       if (ls.cpuLoadPercent !== undefined) {
-        return `Your CPU load is currently at ${ls.cpuLoadPercent}%. Temperature is ${ls.cpuTempC !== null && ls.cpuTempC !== undefined ? ls.cpuTempC + '°C' : 'within normal operating limits'}. Thermal health is nominal.`;
+        return `Your CPU (${ls.cpuModel || 'Processor'}) is operating at ${ls.cpuLoadPercent}% load. Temperature is ${ls.cpuTempC !== null && ls.cpuTempC !== undefined ? ls.cpuTempC + '°C' : 'within normal operating limits'}. Thermal health is nominal.`;
       }
     }
 
@@ -197,6 +193,13 @@ Your instructions:
       }
     }
 
+    if (q.includes('battery') || q.includes('power')) {
+      if (ls.batteryHasBattery) {
+        return `Battery is at ${ls.batteryPercent}%, with a health rating of ${ls.batteryHealth}%.`;
+      }
+      return "This system is running on direct AC mains power supply (Desktop / All-In-One).";
+    }
+
     if (q.includes('virus') || q.includes('threat') || q.includes('malware') || q.includes('defender')) {
       const threatMod = (fs.modules || []).find(m => m.key === 'threat');
       if (threatMod) {
@@ -204,7 +207,7 @@ Your instructions:
       }
     }
 
-    return `Based on your latest scan from ${fs.generatedAt ? new Date(fs.generatedAt).toLocaleDateString() : 'system records'}, overall status is ${fs.overallStatus || 'HEALTHY'}. All active subsystems are operating within configured thresholds.`;
+    return `Based on your latest diagnostic snapshot from ${fs.generatedAt ? new Date(fs.generatedAt).toLocaleDateString() : 'system telemetry'}, your PC overall health status is ${fs.overallStatus || 'HEALTHY'}. All active subsystems are operating within configured thresholds. Let me know if you would like me to check any specific component!`;
   }
 
   /**
@@ -232,7 +235,6 @@ Respond ONLY with valid JSON in this exact schema:
 
     try {
       const rawText = await this.generateContent(prompt);
-      // Clean JSON fences if model wrapped in ```json
       const cleanJson = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
       const parsed = JSON.parse(cleanJson);
       this.cache.set(cacheKey, parsed);
