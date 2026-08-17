@@ -203,11 +203,22 @@ Your Knowledge & Expertise:
       return advice;
     }
 
-    if (q.includes('battery') || q.includes('charge') || q.includes('power')) {
+    if (q.includes('battery') || q.includes('calibrate') || q.includes('charge') || q.includes('longevity')) {
+      let batMsg = "### Avantis Laptop Battery Calibration & Longevity Guide:\n\n";
+      batMsg += "1. **Calibration Cycle (Every 2–3 Months):**\n";
+      batMsg += "   • Charge the laptop fully to 100% and leave it plugged in for 30 minutes.\n";
+      batMsg += "   • Unplug and use the laptop until it reaches low power (around 5–7%) and enters hibernation.\n";
+      batMsg += "   • Recharge uninterrupted to 100% to synchronize the battery gauge controller.\n\n";
+      batMsg += "2. **Longevity Best Practices:**\n";
+      batMsg += "   • Avoid frequent deep discharges below 10%.\n";
+      batMsg += "   • Keep cooling vents clear—excessive heat degrades battery chemical capacity.\n";
+      batMsg += "   • Run 'Update Drivers' to ensure the latest ACPI battery management drivers are installed.\n";
       if (ls.batteryHasBattery) {
-        return `Battery Telemetry:\n• Current Charge: ${ls.batteryPercent}%\n• Battery Health: ${ls.batteryHealth}%\n• Status: ${ls.batteryStatus || 'Discharging'}\n\nTip: To maximize laptop battery lifespan, avoid letting the battery drop below 15% frequently and keep operating temperatures moderate.`;
+        batMsg += `\n*Current Live Status: ${ls.batteryPercent}% charged, ${ls.batteryHealth}% health rating.*`;
+      } else {
+        batMsg += "\n*Note: This specific PC is currently running on direct AC mains power.*";
       }
-      return "This system is operating on direct AC mains power supply (Desktop / All-In-One).";
+      return batMsg;
     }
 
     if (q.includes('gpu') || q.includes('graphics') || q.includes('video card')) {
