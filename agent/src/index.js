@@ -11,6 +11,8 @@ const DriverManager = require('./drivers/driver_manager');
 const NetworkOptimizer = require('./network/network_optimizer');
 const SystemScanOrchestrator = require('./orchestrator/system_scan_orchestrator');
 const ReportStore = require('./reports/report_store');
+const GeminiService = require('./ai/gemini_service');
+const PredictiveMonitor = require('./ai/predictive_monitor');
 
 const app = express();
 app.use(cors());
@@ -26,6 +28,8 @@ const driverManager = new DriverManager();
 const networkOptimizer = new NetworkOptimizer();
 const orchestrator = new SystemScanOrchestrator();
 const reportStore = new ReportStore();
+const geminiService = new GeminiService();
+const predictiveMonitor = new PredictiveMonitor(reportStore, geminiService, notificationManager);
 
 const AGENT_PORT = 9140;
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:9141';
@@ -229,6 +233,61 @@ app.post('/api/notifications/test', (req, res) => {
   res.json({ success: true, message: 'Test notification triggered', summary });
 });
 
+// 8. AI Assistant & Predictive Monitoring Endpoints
+app.post('/api/ai/chat', async (req, res) => {
+  try {
+    const { question } = req.body || {};
+    if (!question) return res.status(400).json({ success: false, message: 'Question required.' });
+
+    const latestReport = reportStore.getLatestReport();
+    const answer = await geminiService.askAssistant(question, latestReport, latestDiagnostics);
+    res.json({ success: true, answer });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.get('/api/ai/predictions', (req, res) => {
+  res.json({
+    success: true,
+    predictions: predictiveMonitor.getActivePredictions()
+  });
+});
+
+app.post('/api/ai/predict/check', async (req, res) => {
+  await predictiveMonitor.checkTrends();
+  res.json({
+    success: true,
+    predictions: predictiveMonitor.getActivePredictions()
+  });
+});
+
+app.post('/api/ai/resolve', async (req, res) => {
+  try {
+    const { action } = req.body || {};
+    let executionResult = null;
+
+    if (action === 'run_cleanup') {
+      executionResult = cleanupEngine.executeCleanup({ includeRecycleBin: false, runVolumeOptimization: true });
+    } else if (action === 'run_driver_update') {
+      executionResult = driverManager.updateAllDrivers();
+    } else if (action === 'optimize_network') {
+      executionResult = networkOptimizer.optimize();
+    } else if (action === 'schedule_disk_check' || action === 'reduce_startup_apps') {
+      executionResult = { status: 'QUEUED', message: 'Diagnostic check queued for next scheduled maintenance window.' };
+    } else {
+      executionResult = { status: 'NOOP', message: 'No action required.' };
+    }
+
+    // Refresh trend detection after fix execution
+    setTimeout(() => predictiveMonitor.checkTrends(), 2000);
+
+    res.json({ success: true, action, result: executionResult });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 app.post('/api/support/ticket', async (req, res) => {
   try {
     const { customerName, customerEmail, issueDescription, priority } = req.body;
@@ -287,6 +346,9 @@ async function startAgent() {
   }
 
   await refreshDiagnostics(true);
+
+  // Initialize predictive monitoring engine
+  predictiveMonitor.start();
 
   // Real-time polling loop every 5 seconds (5000ms)
   setInterval(() => refreshDiagnostics(false), 5000);

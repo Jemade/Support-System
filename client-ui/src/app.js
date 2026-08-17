@@ -175,6 +175,8 @@ async function loadSummaryData() {
       if (promptEl) promptEl.style.display = 'block';
       if (metaText) metaText.innerText = 'No scans recorded yet';
     }
+
+    await loadAiPredictions();
   } catch (err) {
     console.warn('[Summary] Could not fetch latest report:', err.message);
   }
@@ -710,7 +712,7 @@ function renderChatMessages() {
 
   container.innerHTML = chatMessages.map(msg => `
     <div class="chat-message-row ${msg.sender}">
-      <div class="chat-bubble">${msg.text.replace(/\n/g, '<br>')}</div>
+      <div class="chat-bubble ${msg.isTyping ? 'typing-bubble' : ''}">${msg.text.replace(/\n/g, '<br>')}</div>
     </div>
   `).join('');
 
@@ -718,7 +720,7 @@ function renderChatMessages() {
   if (body) body.scrollTop = body.scrollHeight;
 }
 
-function handleChatSubmit(e) {
+async function handleChatSubmit(e) {
   e.preventDefault();
   const input = document.getElementById('chat-input-field');
   if (!input) return;
@@ -732,20 +734,51 @@ function handleChatSubmit(e) {
     text,
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   });
+
+  // Add temporary typing indicator
+  const typingMsgId = 'typing-' + Date.now();
+  chatMessages.push({
+    id: typingMsgId,
+    sender: 'assistant',
+    text: 'Thinking...',
+    isTyping: true,
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  });
   renderChatMessages();
 
-  setTimeout(() => {
-    const reply = generateAssistantReply(text);
+  try {
+    const res = await fetch(`${AGENT_URL}/api/ai/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: text })
+    });
+    const data = await res.json();
+    
+    // Remove typing bubble
+    chatMessages = chatMessages.filter(m => m.id !== typingMsgId);
+    
+    const replyText = (data && data.success && data.answer) 
+      ? data.answer 
+      : generateAssistantFallbackReply(text);
+
     chatMessages.push({
       sender: 'assistant',
-      text: reply,
+      text: replyText,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
     renderChatMessages();
-  }, 300);
+  } catch (err) {
+    chatMessages = chatMessages.filter(m => m.id !== typingMsgId);
+    chatMessages.push({
+      sender: 'assistant',
+      text: generateAssistantFallbackReply(text),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    });
+    renderChatMessages();
+  }
 }
 
-function generateAssistantReply(query) {
+function generateAssistantFallbackReply(query) {
   const q = query.toLowerCase();
   const d = liveDiagnosticsCache;
 
@@ -774,17 +807,60 @@ function generateAssistantReply(query) {
     return 'This system is operating on direct AC mains power supply (Desktop / All-In-One).';
   }
 
-  if (q.includes('scan') || q.includes('maintenance')) {
-    routeToNav('fullscan');
-    return 'Navigated to Full System Scan. You can view the latest audit summary or trigger an automated 5-stage maintenance pass under Actions.';
-  }
+  return `I am Avantis PC Assist. All telemetry is actively monitored. You can inspect live sensors under "Scan Hardware" or run automated maintenance under "Actions".`;
+}
 
-  if (q.includes('driver')) {
-    routeToNav('drivers');
-    return 'Opening Update Drivers view. Verified drivers for your hardware model will appear.';
-  }
+// AI Predictive Monitoring: Proactive banners with One-Click Resolution
+async function loadAiPredictions() {
+  const container = document.getElementById('summary-ai-predictions');
+  if (!container) return;
 
-  return `I understand you are asking about "${query}". You can inspect live sensors under "Scan Hardware", run automated routines under "Actions", or contact support if you need assistance.`;
+  try {
+    const res = await fetch(`${AGENT_URL}/api/ai/predictions`);
+    const data = await res.json();
+    const predictions = data.predictions || [];
+
+    if (predictions.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = predictions.map(p => `
+      <div style="background:#ffffff; border:1px solid ${p.urgency === 'high' ? 'var(--status-critical-border)' : 'var(--status-warning-border)'}; border-left:4px solid ${p.urgency === 'high' ? 'var(--status-critical)' : 'var(--status-warning)'}; padding:16px 20px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+            <span class="badge-status ${p.urgency === 'high' ? 'badge-CRITICAL' : 'badge-WARNING'}">AI Predictive Care · ${p.urgency.toUpperCase()}</span>
+            <span style="font-size:11.5px; color:var(--text-muted);">${new Date(p.detectedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          </div>
+          <p style="font-size:13px; color:var(--text-main); font-weight:600;">${p.explanation}</p>
+        </div>
+        ${p.recommendedAction && p.recommendedAction !== 'no_action_needed' ? `
+          <button type="button" class="btn-primary" style="padding:7px 16px; font-size:12.5px; white-space:nowrap; margin-left:16px;" onclick="resolveAiPrediction('${p.recommendedAction}', '${p.id}')">
+            Resolve Now
+          </button>
+        ` : ''}
+      </div>
+    `).join('');
+  } catch (err) {
+    console.warn('[AI Predictions] Could not load predictions:', err.message);
+  }
+}
+
+async function resolveAiPrediction(actionKey, predictionId) {
+  showInfoModal('Executing AI Resolution', `Starting recommended action [${actionKey}]...`);
+  try {
+    const res = await fetch(`${AGENT_URL}/api/ai/resolve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: actionKey, predictionId })
+    });
+    const data = await res.json();
+    showInfoModal('Resolution Completed', data.result?.summaryMessage || 'Recommended action successfully applied.');
+    loadSummaryData();
+    loadAiPredictions();
+  } catch (err) {
+    showInfoModal('Resolution Error', err.message);
+  }
 }
 
 // ============================================

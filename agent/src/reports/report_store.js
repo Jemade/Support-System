@@ -102,6 +102,32 @@ class ReportStore {
       return null;
     }
   }
+
+  getLatestReport() {
+    this.ensureReportsDir();
+    try {
+      const files = fs.readdirSync(this.reportsDir)
+        .filter(f => f.endsWith('.json'))
+        .sort((a, b) => b.localeCompare(a));
+      if (files.length === 0) return null;
+      return this.getReport(files[0]);
+    } catch {
+      return null;
+    }
+  }
+
+  getAllReports(limit = 100) {
+    this.ensureReportsDir();
+    try {
+      const files = fs.readdirSync(this.reportsDir)
+        .filter(f => f.endsWith('.json'))
+        .sort((a, b) => a.localeCompare(b)) // Oldest to newest
+        .slice(-limit);
+      return files.map(f => this.getReport(f)).filter(Boolean);
+    } catch {
+      return [];
+    }
+  }
 }
 
 module.exports = ReportStore;
