@@ -911,10 +911,11 @@ body {
 }
 
 .chat-input-bar {
-  padding: 12px 16px;
+  padding: 10px 14px;
   background: #ffffff;
   border-top: 1px solid var(--panel-border);
   display: flex;
+  align-items: flex-end;
   gap: 8px;
 }
 
@@ -925,7 +926,16 @@ body {
   padding: 8px 12px;
   font-family: inherit;
   font-size: 12.5px;
+  line-height: 1.45;
   outline: none;
+  resize: none;
+  min-height: 38px;
+  max-height: 120px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  background: #ffffff;
+  color: var(--text-main);
+  transition: border-color var(--transition-fast);
 }
 
 .chat-input:focus {
@@ -937,11 +947,18 @@ body {
   color: #ffffff;
   border: none;
   border-radius: 0px;
-  padding: 0 12px;
+  height: 38px;
+  width: 38px;
+  flex-shrink: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background var(--transition-fast);
+}
+
+.chat-send-btn:hover {
+  background: var(--avantis-teal-cta-hover);
 }
 
 /* Modals */

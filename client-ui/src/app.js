@@ -753,7 +753,7 @@ function renderChatMessages() {
 }
 
 async function handleChatSubmit(e) {
-  e.preventDefault();
+  if (e && e.preventDefault) e.preventDefault();
   const input = document.getElementById('chat-input-field');
   if (!input) return;
 
@@ -761,6 +761,8 @@ async function handleChatSubmit(e) {
   if (!text) return;
 
   input.value = '';
+  input.style.height = '38px';
+
   chatMessages.push({
     sender: 'user',
     text,
@@ -940,6 +942,22 @@ document.addEventListener('click', () => {
   const menu = document.getElementById('lang-dropdown-menu');
   if (menu) menu.style.display = 'none';
 });
+
+// Auto-expanding chat textarea (Gemini & Claude multiline behavior)
+const chatInputEl = document.getElementById('chat-input-field');
+if (chatInputEl) {
+  chatInputEl.addEventListener('input', () => {
+    chatInputEl.style.height = 'auto';
+    chatInputEl.style.height = Math.min(chatInputEl.scrollHeight, 120) + 'px';
+  });
+
+  chatInputEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleChatSubmit(e);
+    }
+  });
+}
 
 // Initial Bootstrap on load
 loadSummaryData();
