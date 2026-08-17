@@ -161,14 +161,16 @@ class PredictiveMonitor {
 
         predictions.push(prediction);
 
-        // Fire native Windows toast notification if not already notified for this exact trend
+        // Fire native Windows OS popup toast notification if not already notified for this exact trend
         if (!this.notifiedHashes.has(flagHash)) {
           this.notifiedHashes.add(flagHash);
-          if (this.notificationManager && typeof this.notificationManager.fireToast === 'function') {
-            this.notificationManager.fireToast(
-              'Avantis Predictive Care',
-              prediction.explanation
-            );
+          if (this.notificationManager && typeof this.notificationManager.sendWindowsToast === 'function') {
+            console.log(`[PredictiveMonitor] Firing Windows OS Toast Popup for [${prediction.flagType}]: ${prediction.explanation}`);
+            this.notificationManager.sendWindowsToast({
+              title: 'Avantis Predictive Care',
+              message: prediction.explanation,
+              launchUrl: 'http://localhost:9142'
+            });
           }
         }
       }

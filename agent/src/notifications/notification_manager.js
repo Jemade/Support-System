@@ -165,7 +165,6 @@ class NotificationManager {
         safeTitle,
         '-Message',
         safeMessage,
-        '-Url',
         safeUrl
       ], {
         windowsHide: true,
@@ -176,6 +175,14 @@ class NotificationManager {
     } catch (err) {
       console.error('[NotificationManager] Failed to launch PowerShell toast process:', err.message);
     }
+  }
+
+  fireToast(title, message, launchUrl = null) {
+    this.sendWindowsToast({
+      title: title || 'Avantis Support',
+      message: message || '',
+      launchUrl: launchUrl || this.clientUiUrl
+    });
   }
 
   /**
