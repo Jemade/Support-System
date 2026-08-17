@@ -171,6 +171,18 @@ Guidelines:
       return "Hello! I'm Avantis Assist. I can help you monitor your computer's health, check processor and memory usage, inspect disk space, explain security scans, and optimize system performance. How can I assist you today?";
     }
 
+    if (q.includes('slow') || q.includes('speed') || q.includes('faster') || q.includes('lag') || q.includes('performance') || q.includes('boost') || q.includes('optimize') || q.includes('tune')) {
+      let advice = "Computers typically slow down over time due to temporary file clutter, background RAM usage, outdated hardware drivers, and accumulated network DNS cache.\n\n### Recommended Actions on your Avantis Dashboard:\n";
+      advice += "1. **Clean Up Files**: Sweeps temporary files, update caches, and runs volume TRIM to restore storage throughput.\n";
+      advice += "2. **Update Drivers**: Scans and applies verified hardware drivers for your system.\n";
+      advice += "3. **Optimize Network**: Resets TCP/IP stack and flushes DNS cache for lower latency.\n";
+      advice += "4. **Full System Scan**: Runs all 5 maintenance passes sequentially for a complete tune-up.";
+      if (ls.ramUsedPercent > 80) {
+        advice += `\n\n*Note: Your memory is currently at ${ls.ramUsedPercent}% utilization (${ls.ramUsedGB || 0} GB used). Consider closing unused applications.*`;
+      }
+      return advice;
+    }
+
     if (q.includes('gpu') || q.includes('graphics') || q.includes('video card')) {
       return "Dedicated GPU telemetry is not present in the current diagnostic report. To monitor your GPU and other hardware components, please run the 'Scan Hardware' module.";
     }
