@@ -706,13 +706,45 @@ document.addEventListener('click', (e) => {
   }
 });
 
+function formatChatMessageContent(rawText) {
+  if (!rawText) return '';
+  
+  // Escape basic HTML entities
+  let text = rawText
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // Convert bold: **text** -> <strong>text</strong>
+  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+  // Convert inline code: `code` -> <code>code</code>
+  text = text.replace(/`([^`]+)`/g, '<code style="background:rgba(0,0,0,0.06); padding:2px 5px; font-family:monospace; font-size:12px;">$1</code>');
+
+  // Convert markdown headers: ### Header or ## Header -> bold section header
+  text = text.replace(/^#{1,4}\s*(.*?)$/gm, '<div style="font-weight:700; color:var(--text-main); margin-top:8px; margin-bottom:4px;">$1</div>');
+
+  // Convert bullet points: * Item or - Item -> clean bullet div
+  text = text.replace(/^[\*\-]\s+(.*?)$/gm, '<div style="display:flex; gap:6px; margin:3px 0 3px 6px;"><span>•</span><span>$1</span></div>');
+
+  // Convert numbered lists: 1. Item -> clean numbered div
+  text = text.replace(/^(\d+)\.\s+(.*?)$/gm, '<div style="display:flex; gap:6px; margin:3px 0 3px 6px;"><span style="font-weight:600;">$1.</span><span>$2</span></div>');
+
+  // Convert newlines to paragraph breaks
+  text = text.replace(/\n\n+/g, '<div style="height:8px;"></div>').replace(/\n/g, '<br>');
+
+  return text;
+}
+
 function renderChatMessages() {
   const container = document.getElementById('chat-messages-list');
   if (!container) return;
 
   container.innerHTML = chatMessages.map(msg => `
     <div class="chat-message-row ${msg.sender}">
-      <div class="chat-bubble ${msg.isTyping ? 'typing-bubble' : ''}">${msg.text.replace(/\n/g, '<br>')}</div>
+      <div class="chat-bubble ${msg.isTyping ? 'typing-bubble' : ''}">
+        ${msg.isTyping ? '<span class="typing-dots">Thinking...</span>' : formatChatMessageContent(msg.text)}
+      </div>
     </div>
   `).join('');
 
