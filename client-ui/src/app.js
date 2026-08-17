@@ -748,6 +748,10 @@ function renderChatMessages() {
     </div>
   `).join('');
 
+  const body = document.getElementById('chat-messages-container');
+  if (body) body.scrollTop = body.scrollHeight;
+}
+
 function autoResizeChatInput() {
   const textarea = document.getElementById('chat-input-field');
   if (!textarea) return;
