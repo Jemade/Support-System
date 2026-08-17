@@ -748,20 +748,27 @@ function renderChatMessages() {
     </div>
   `).join('');
 
-  const body = document.getElementById('chat-messages-container');
-  if (body) body.scrollTop = body.scrollHeight;
+function autoResizeChatInput() {
+  const textarea = document.getElementById('chat-input-field');
+  if (!textarea) return;
+  textarea.style.height = 'auto';
+  const newHeight = Math.min(textarea.scrollHeight, 200);
+  textarea.style.height = newHeight + 'px';
+  textarea.style.overflowY = textarea.scrollHeight > 200 ? 'auto' : 'hidden';
 }
 
 async function handleChatSubmit(e) {
   if (e && e.preventDefault) e.preventDefault();
-  const input = document.getElementById('chat-input-field');
-  if (!input) return;
+  const textarea = document.getElementById('chat-input-field');
+  const sendBtn = document.getElementById('chat-send-btn');
+  if (!textarea) return;
 
-  const text = input.value.trim();
+  const text = textarea.value.trim();
   if (!text) return;
 
-  input.value = '';
-  input.style.height = '38px';
+  textarea.value = '';
+  autoResizeChatInput();
+  if (sendBtn) sendBtn.disabled = true;
 
   chatMessages.push({
     sender: 'user',
@@ -943,18 +950,20 @@ document.addEventListener('click', () => {
   if (menu) menu.style.display = 'none';
 });
 
-// Auto-expanding chat textarea (Gemini & Claude multiline behavior)
+// Auto-expanding chat textarea (Claude/Gemini behavior)
 const chatInputEl = document.getElementById('chat-input-field');
-if (chatInputEl) {
+const chatSendBtnEl = document.getElementById('chat-send-btn');
+
+if (chatInputEl && chatSendBtnEl) {
   chatInputEl.addEventListener('input', () => {
-    chatInputEl.style.height = 'auto';
-    chatInputEl.style.height = Math.min(chatInputEl.scrollHeight, 120) + 'px';
+    autoResizeChatInput();
+    chatSendBtnEl.disabled = chatInputEl.value.trim().length === 0;
   });
 
   chatInputEl.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleChatSubmit(e);
+      if (!chatSendBtnEl.disabled) handleChatSubmit(e);
     }
   });
 }
