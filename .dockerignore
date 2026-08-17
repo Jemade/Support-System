@@ -3,8 +3,10 @@ npm-debug.log
 .git
 .gitignore
 .env
-.env.local
-.DS_Store
-*.log
+*.local
+.system_generated
+dist
+build
 tmp
-scratch
+logs
+*.log

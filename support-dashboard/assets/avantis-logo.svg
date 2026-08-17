@@ -1,19 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 44" fill="none">
-  <!-- A1: Pointed apex, open bottom, no crossbar -->
-  <path d="M4 33L17 7L30 33" stroke="#13A3AF" stroke-width="5.2" stroke-linecap="square" stroke-linejoin="miter"/>
-  <!-- V: Valley open at top -->
-  <path d="M28 7L41 33L54 7" stroke="#13A3AF" stroke-width="5.2" stroke-linecap="square" stroke-linejoin="miter"/>
-  <!-- A2: Pointed apex, open bottom, no crossbar -->
-  <path d="M52 33L65 7L78 33" stroke="#13A3AF" stroke-width="5.2" stroke-linecap="square" stroke-linejoin="miter"/>
-  <!-- N: Bold blocky letterform, squared terminals -->
-  <path d="M86 33V7L106 33V7" stroke="#13A3AF" stroke-width="5.2" stroke-linecap="square" stroke-linejoin="miter"/>
-  <!-- T: Bold blocky letterform, squared terminals -->
-  <path d="M112 7H136M124 7V33" stroke="#13A3AF" stroke-width="5.2" stroke-linecap="square"/>
-  <!-- i: Lowercase, shorter stem, separated dot, solid #13A3AF -->
-  <path d="M144 15V33" stroke="#13A3AF" stroke-width="5.2" stroke-linecap="square"/>
-  <circle cx="144" cy="7" r="3" fill="#13A3AF"/>
-  <!-- S: Squared terminals, bold geometric curvature -->
-  <path d="M178 13C178 9 171 7 164 7C157 7 154 10 154 13.5C154 20.5 178 18 178 26.5C178 33 166 33.5 157 33.5C150 33.5 147 31 147 27.5" stroke="#13A3AF" stroke-width="5.2" stroke-linecap="square"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 46" fill="none">
+  <!-- A1: Upward Chevron ('^') with clean rounded terminals -->
+  <path d="M 4 33 L 17 8 L 30 33" stroke="#13A3AF" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- V: Downward Chevron ('v') with clear whitespace spacing -->
+  <path d="M 36 8 L 49 33 L 62 8" stroke="#13A3AF" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- A2: Upward Chevron ('^') -->
+  <path d="M 68 33 L 81 8 L 94 33" stroke="#13A3AF" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- N: Bold letterform -->
+  <path d="M 102 33 V 8 L 122 33 V 8" stroke="#13A3AF" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- T: Bold letterform -->
+  <path d="M 129 8 H 151 M 140 8 V 33" stroke="#13A3AF" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- i: Lowercase with separated round dot -->
+  <path d="M 158 16 V 33" stroke="#13A3AF" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="158" cy="9" r="2.8" fill="#13A3AF"/>
+  <!-- S: Geometric curvature -->
+  <path d="M 188 14 C 188 9 181 8 175 8 C 168 8 165 11 165 14.5 C 165 21 188 19 188 27 C 188 33 177 33.5 168 33.5 C 161 33.5 158 31 158 28" stroke="#13A3AF" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round"/>
   <!-- Subtitle: Product of Zimbabwe in lighter muted teal (#98D3D8) -->
-  <text x="40" y="42" fill="#98D3D8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Plus Jakarta Sans', sans-serif" font-weight="600" font-size="8.5" letter-spacing="2.2">PRODUCT OF ZIMBABWE</text>
+  <text x="44" y="44" fill="#98D3D8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Plus Jakarta Sans', sans-serif" font-weight="600" font-size="8.5" letter-spacing="2.4">PRODUCT OF ZIMBABWE</text>
 </svg>

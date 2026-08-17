@@ -1,4 +1,5 @@
-# Multi-stage build for Avantis Customer Support Interface
+# Multi-stage Dockerfile for Avantis Hardware Support Dashboard (Port 9142)
+
 # Stage 1: Build & Dependencies
 FROM node:20-alpine AS builder
 WORKDIR /app
@@ -11,7 +12,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=9142
 
-# Copy production node_modules and application code
+# Copy production node_modules and application files
 COPY --from=builder /app/node_modules ./node_modules
 COPY client-ui/ ./
 

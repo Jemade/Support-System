@@ -3,545 +3,678 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Avantis Hardware Support</title>
-  <meta name="description" content="Avantis Hardware Support — Comprehensive hardware diagnostics, driver updates, and health telemetry for Avantis laptops, desktops, tablets, and all-in-ones.">
-  <!-- Favicon: AV Monogram Badge -->
-  <link rel="icon" type="image/svg+xml" href="assets/avantis-icon.svg">
+  <title>Avantis PC Assist</title>
+  
+  <!-- Tab Favicon -->
+  <link rel="icon" type="image/png" href="assets/avantis_logo.png">
+  <link rel="shortcut icon" href="assets/favicon.ico">
+  
+  <!-- Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- ===== APP HEADER ===== -->
-  <header class="app-header">
-    <div class="header-left">
-      <!-- Exact AVANTiS Wordmark Image Asset -->
-      <a href="#home" class="avantis-brand-link" onclick="switchTab('home')">
-        <img src="assets/avantis-logo.svg" alt="AVANTiS - Product of Zimbabwe" class="avantis-logo-img">
-      </a>
-    </div>
+  <!-- ==================== 1. PERSISTENT TOP HEADER ==================== -->
+  <header class="app-top-header">
+    
+    <!-- Top Row: Logo, Primary Tabs, Service Plan & Tag -->
+    <div class="app-brand-bar">
+      <div class="brand-bar-left">
+        <a href="javascript:void(0)" class="avantis-brand-link" onclick="routeToNav('home')">
+          <img src="assets/avantis-logo.svg" alt="AVANTiS - Product of Zimbabwe" class="avantis-logo-img">
+        </a>
 
-    <div class="header-right">
-      <div class="agent-status-container">
-        <div class="status-live-dot" id="status-live-dot"></div>
-        <span id="agent-status-time">Last checked: Just now</span>
+        <!-- Primary Navigation Tabs (Matching Reference Image) -->
+        <nav class="primary-nav-tabs" id="primary-nav-tabs">
+          <button type="button" class="nav-tab-link active" id="tab-link-home" onclick="routeToNav('home')">Home</button>
+          <button type="button" class="nav-tab-link" id="tab-link-discover" onclick="routeToNav('discover')">Discover</button>
+          <button type="button" class="nav-tab-link" id="tab-link-support" onclick="routeToNav('support')">Support</button>
+          <button type="button" class="nav-tab-link" id="tab-link-history" onclick="routeToNav('history')">History</button>
+          <button type="button" class="nav-tab-link" id="tab-link-settings" onclick="routeToNav('settings')">Settings</button>
+        </nav>
       </div>
-      <button class="btn btn-secondary btn-sm" onclick="openQaChecklistModal()" title="Cross-Product Hardware QA Matrix">
-        Device Compatibility
-      </button>
-    </div>
-  </header>
 
-  <!-- ===== TOP TABS NAVIGATION ===== -->
-  <nav class="tab-nav" id="tab-nav">
-    <button class="tab-btn active" data-tab="home">Home</button>
-    <button class="tab-btn" data-tab="troubleshoot">Troubleshoot</button>
-    <button class="tab-btn" data-tab="drivers">Drivers</button>
-    <button class="tab-btn" data-tab="history">History</button>
-  </nav>
-
-  <!-- ===== MAIN GRID LAYOUT ===== -->
-  <div class="main-grid">
-    <div class="main-column">
-
-      <!-- ==================== TAB 1: HOME ==================== -->
-      <div class="tab-content active" id="tab-home">
-
-        <!-- Active Alerts (with guided next steps) -->
-        <div class="alerts-container" id="alerts-container"></div>
-
-        <!-- Hero Primary Action Area -->
-        <div class="hero-scan">
-          <div class="health-ring-wrap">
-            <svg viewBox="0 0 90 90">
-              <circle class="ring-bg" cx="45" cy="45" r="37.5" />
-              <circle class="ring-fill" id="health-ring" cx="45" cy="45" r="37.5"
-                stroke-dasharray="235.6"
-                stroke-dashoffset="235.6" />
+      <div class="brand-bar-right">
+        <!-- Language Selector Dropdown -->
+        <div class="lang-selector-wrap" id="lang-selector-wrap">
+          <button type="button" class="lang-btn" id="lang-selector-btn" onclick="toggleLanguageMenu(event)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
             </svg>
-            <div class="health-score-num" id="health-score">—</div>
-          </div>
-          <div class="hero-info">
-            <h1 class="hero-title" id="hero-title">System Health & Diagnostics</h1>
-            <div class="hero-subtitle" id="hero-subtitle">All hardware components operating within normal baseline parameters.</div>
-            <div class="hero-actions">
-              <button class="btn btn-primary" id="btn-scan" onclick="runScan()">
-                Run Diagnostic Check
-              </button>
-              <button class="btn btn-secondary" id="btn-cleanup" onclick="runCleanupScan()">
-                Clean Temp Files
-              </button>
-            </div>
+            <span id="current-lang-label">English</span>
+            <span>▾</span>
+          </button>
+          
+          <div class="lang-dropdown-menu" id="lang-dropdown-menu" style="display:none;">
+            <button type="button" class="lang-opt-btn" onclick="setLanguage('en')">English (US)</button>
+            <button type="button" class="lang-opt-btn" onclick="setLanguage('sn')">ChiShona (ZW)</button>
+            <button type="button" class="lang-opt-btn" onclick="setLanguage('nd')">isiNdebele (ZW)</button>
+            <button type="button" class="lang-opt-btn" onclick="setLanguage('fr')">Français</button>
+            <button type="button" class="lang-opt-btn" onclick="setLanguage('pt')">Português</button>
           </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Hardware Health Metrics Grid -->
-        <div>
-          <div class="section-header">Hardware Health & Telemetry</div>
-          <div class="metrics-grid">
-            <!-- CPU Card -->
-            <div class="metric-card" id="metric-card-cpu">
-              <div class="metric-label">
-                <span>Processor</span>
-                <span class="metric-badge metric-badge--healthy" id="cpu-temp-badge">45°C</span>
-              </div>
-              <div class="metric-value" id="cpu-load-val">0%</div>
-              <div class="metric-detail" id="cpu-detail">Normal operating temperature</div>
-              <div class="progress-track">
-                <div class="progress-fill" id="cpu-bar" style="width:0%"></div>
-              </div>
-            </div>
-
-            <!-- Memory Card -->
-            <div class="metric-card" id="metric-card-ram">
-              <div class="metric-label">
-                <span>Memory</span>
-                <span class="mono" id="ram-spec" style="font-size:11px; color: var(--text-faint)">DDR</span>
-              </div>
-              <div class="metric-value" id="ram-val">0%</div>
-              <div class="metric-detail" id="ram-detail">0 GB used of 0 GB total</div>
-              <div class="progress-track">
-                <div class="progress-fill" id="ram-bar" style="width:0%"></div>
-              </div>
-            </div>
-
-            <!-- Storage Card -->
-            <div class="metric-card" id="metric-card-storage">
-              <div class="metric-label">
-                <span id="storage-title">Storage (C:)</span>
-                <span class="metric-badge metric-badge--healthy" id="smart-badge">SMART Passed</span>
-              </div>
-              <div class="metric-value" id="storage-val">0%</div>
-              <div class="metric-detail" id="storage-detail">0 GB free of 0 GB</div>
-              <div class="progress-track">
-                <div class="progress-fill" id="storage-bar" style="width:0%"></div>
-              </div>
-            </div>
-
-            <!-- Power Card (Dynamically adapts: Battery on laptops/tablets, AC PSU on desktops/AIO) -->
-            <div class="metric-card" id="metric-card-power">
-              <div class="metric-label">
-                <span id="power-card-title">Power Supply</span>
-                <span id="power-status-badge" class="metric-badge metric-badge--healthy">AC Power</span>
-              </div>
-              <div class="metric-value" id="battery-val">100%</div>
-              <div class="metric-detail" id="power-detail">Connected to AC mains</div>
-              <div class="progress-track">
-                <div class="progress-fill" id="battery-bar" style="width:100%"></div>
-              </div>
-            </div>
+    <!-- Row 2: 6 Horizontal Core Actions Toolbar (Matching Reference Image) -->
+    <nav class="actions-toolbar" id="actions-toolbar">
+      <div class="actions-toolbar-inner">
+        <!-- 1. Full system scan -->
+        <button type="button" class="toolbar-action-btn active" id="tb-btn-fullscan" onclick="routeToNav('home')">
+          <div class="tb-action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <circle cx="12" cy="12" r="4"></circle>
+              <line x1="12" y1="2" x2="12" y2="4"></line>
+              <line x1="12" y1="20" x2="12" y2="22"></line>
+              <line x1="2" y1="12" x2="4" y2="12"></line>
+              <line x1="20" y1="12" x2="22" y2="12"></line>
+            </svg>
           </div>
-        </div>
+          <span class="tb-action-label">Full system scan</span>
+        </button>
 
-        <!-- Threat Detection / Security Status Strip -->
-        <div class="security-bar" id="security-bar">
-          <div class="security-icon-box">
+        <!-- 2. Update software / drivers -->
+        <button type="button" class="toolbar-action-btn" id="tb-btn-drivers" onclick="routeToNav('drivers')">
+          <div class="tb-action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <span class="tb-action-label">Update software</span>
+        </button>
+
+        <!-- 3. Scan hardware -->
+        <button type="button" class="toolbar-action-btn" id="tb-btn-scanhw" onclick="routeToNav('scanhw')">
+          <div class="tb-action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="4" width="16" height="16"></rect>
+              <rect x="9" y="9" width="6" height="6"></rect>
+              <line x1="9" y1="1" x2="9" y2="4"></line>
+              <line x1="15" y1="1" x2="15" y2="4"></line>
+              <line x1="9" y1="20" x2="9" y2="23"></line>
+              <line x1="15" y1="20" x2="15" y2="23"></line>
+              <line x1="1" y1="9" x2="4" y2="9"></line>
+              <line x1="1" y1="15" x2="4" y2="15"></line>
+              <line x1="20" y1="9" x2="23" y2="9"></line>
+              <line x1="20" y1="15" x2="23" y2="15"></line>
+            </svg>
+          </div>
+          <span class="tb-action-label">Scan hardware</span>
+        </button>
+
+        <!-- 4. Boost performance / cleanup -->
+        <button type="button" class="toolbar-action-btn" id="tb-btn-cleanup" onclick="routeToNav('cleanup')">
+          <div class="tb-action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <span class="tb-action-label">Boost performance</span>
+        </button>
+
+        <!-- 5. Optimize network -->
+        <button type="button" class="toolbar-action-btn" id="tb-btn-network" onclick="routeToNav('network')">
+          <div class="tb-action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+              <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+              <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+              <line x1="12" y1="20" x2="12.01" y2="20"></line>
+            </svg>
+          </div>
+          <span class="tb-action-label">Optimize network</span>
+        </button>
+
+        <!-- 6. Remove viruses / threat scan -->
+        <button type="button" class="toolbar-action-btn" id="tb-btn-threat" onclick="routeToNav('threat')">
+          <div class="tb-action-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              <polyline points="9 12 11 14 15 10"></polyline>
             </svg>
           </div>
-          <div class="security-info">
-            <div class="security-title">Windows Defender Antivirus Protection</div>
-            <div class="security-detail" id="security-detail">Active real-time protection · No security threats detected</div>
-          </div>
-          <div class="security-status-badge" id="security-status">Active</div>
-        </div>
-
-        <!-- Contextual Performance Insights -->
-        <div class="tips-section" id="tips-section">
-          <div class="section-header" style="margin-bottom:8px">Performance Tuning & Insights</div>
-          <div id="tips-list">
-            <div class="tip-item">
-              <span class="tip-icon">⚡</span>
-              <span>All systems operating optimally. Background monitoring service active.</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- ==================== TAB 2: TROUBLESHOOT ==================== -->
-      <div class="tab-content" id="tab-troubleshoot">
-        <div class="troubleshoot-header">
-          <div>
-            <h2>Isolated Component Tests</h2>
-            <p style="font-size:13px; color:var(--text-muted); margin-top:2px;">Targeted on-demand diagnostic checks per hardware subsystem.</p>
-          </div>
-          <button class="btn btn-primary btn-sm" id="btn-full-test" onclick="runAllTests()">
-            Run Full System Diagnostics
-          </button>
-        </div>
-
-        <div class="test-cards">
-          <!-- 1. Processor (CPU) Test Card with Cohesive Chip Outline Icon -->
-          <div class="test-card" id="test-card-cpu">
-            <div class="test-card-header">
-              <div class="hw-icon-container">
-                <svg viewBox="0 0 24 24">
-                  <rect x="4" y="4" width="16" height="16" rx="2"></rect>
-                  <rect x="9" y="9" width="6" height="6"></rect>
-                  <path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"></path>
-                </svg>
-              </div>
-              <div class="test-card-title">Processor (CPU)</div>
-            </div>
-            <div class="test-card-desc">Thermal load stress test — verifies clock stability and core heat dissipation under stress.</div>
-            <div class="test-card-footer">
-              <button class="btn btn-secondary btn-sm" onclick="runComponentTest('cpu')">Run CPU Test</button>
-            </div>
-            <div id="test-result-cpu"></div>
-          </div>
-
-          <!-- 2. Memory (RAM) Test Card with Cohesive RAM Stick Outline Icon -->
-          <div class="test-card" id="test-card-memory">
-            <div class="test-card-header">
-              <div class="hw-icon-container">
-                <svg viewBox="0 0 24 24">
-                  <path d="M2 7h20v10H2z"></path>
-                  <path d="M6 10h2v4H6zM11 10h2v4h-2zM16 10h2v4h-2z"></path>
-                  <path d="M4 17v2M8 17v2M12 17v2M16 17v2M20 17v2"></path>
-                </svg>
-              </div>
-              <div class="test-card-title">Memory (RAM)</div>
-            </div>
-            <div class="test-card-desc">Memory integrity verification — tests read/write fidelity and address bank parity.</div>
-            <div class="test-card-footer">
-              <button class="btn btn-secondary btn-sm" onclick="runComponentTest('memory')">Run RAM Test</button>
-            </div>
-            <div id="test-result-memory"></div>
-          </div>
-
-          <!-- 3. Storage Drive Test Card with Cohesive Drive Outline Icon -->
-          <div class="test-card" id="test-card-storage">
-            <div class="test-card-header">
-              <div class="hw-icon-container">
-                <svg viewBox="0 0 24 24">
-                  <rect x="3" y="4" width="18" height="16" rx="2"></rect>
-                  <line x1="7" y1="12" x2="17" y2="12"></line>
-                  <line x1="7" y1="8" x2="12" y2="8"></line>
-                  <circle cx="17" cy="16" r="1" fill="currentColor"></circle>
-                </svg>
-              </div>
-              <div class="test-card-title">Primary Storage (SSD/NVMe)</div>
-            </div>
-            <div class="test-card-desc">Drive health verification — evaluates SMART parameters, reallocated sectors, and write life.</div>
-            <div class="test-card-footer">
-              <button class="btn btn-secondary btn-sm" onclick="runComponentTest('storage')">Run Drive Test</button>
-            </div>
-            <div id="test-result-storage"></div>
-          </div>
-
-          <!-- 4. Power / Battery Test Card with Cohesive Power Outline Icon -->
-          <div class="test-card" id="test-card-power">
-            <div class="test-card-header">
-              <div class="hw-icon-container">
-                <svg viewBox="0 0 24 24" id="power-test-icon">
-                  <rect x="2" y="7" width="16" height="10" rx="2"></rect>
-                  <line x1="20" y1="10" x2="20" y2="14"></line>
-                  <line x1="6" y1="11" x2="6" y2="13"></line>
-                  <line x1="10" y1="11" x2="10" y2="13"></line>
-                </svg>
-              </div>
-              <div class="test-card-title" id="power-test-title">Power Supply & Battery</div>
-            </div>
-            <div class="test-card-desc" id="power-test-desc">Battery diagnostics — analyzes full design capacity degradation and AC line stability.</div>
-            <div class="test-card-footer">
-              <button class="btn btn-secondary btn-sm" id="btn-run-power-test" onclick="runComponentTest('power')">Run Power Test</button>
-            </div>
-            <div id="test-result-power"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ==================== TAB 3: DRIVERS ==================== -->
-      <div class="tab-content" id="tab-drivers">
-        <div class="drivers-header">
-          <div>
-            <h2>Avantis Driver Updates</h2>
-            <p style="font-size:13px; color:var(--text-muted); margin-top:2px;">Official verified drivers tailored for your specific Avantis model.</p>
-          </div>
-          <div class="drivers-actions">
-            <button class="btn btn-secondary btn-sm" id="btn-check-drivers" onclick="checkDriverUpdates()">
-              Check for Updates
-            </button>
-            <button class="btn btn-primary btn-sm" id="btn-update-all" onclick="updateAllDrivers()" style="display:none">
-              Update All Drivers
-            </button>
-          </div>
-        </div>
-
-        <div class="driver-list" id="driver-list">
-          <div class="driver-item-header">
-            <div style="display:grid; grid-template-columns: 1.4fr 120px 120px 110px 150px; gap:12px; width:100%">
-              <span>Hardware Component</span>
-              <span>Installed Version</span>
-              <span>Latest Available</span>
-              <span>Status</span>
-              <span>Action</span>
-            </div>
-          </div>
-          <div id="driver-list-body">
-            <div class="empty-state">
-              <div class="empty-state-icon">📦</div>
-              <div>Click "Check for Updates" to query the Avantis Driver Catalog for this device model.</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="driver-note">
-          <!-- Backend driver catalog integration seam: GET /api/drivers/{modelId} -->
-          <strong>Avantis Driver Catalog:</strong> All updates are verified by Avantis Technologies quality assurance for stability, thermal performance, and battery efficiency.
-        </div>
-      </div>
-
-      <!-- ==================== TAB 4: HISTORY ==================== -->
-      <div class="tab-content" id="tab-history">
-        <div class="history-header">
-          <div>
-            <h2>Device Diagnostic Report</h2>
-            <p style="font-size:13px; color:var(--text-muted); margin-top:2px;">Complete diagnostic telemetry log for technical support escalation.</p>
-          </div>
-          <div class="history-actions">
-            <button class="btn btn-secondary btn-sm" onclick="downloadReport()">
-              Download HTML Report
-            </button>
-            <button class="btn btn-ghost btn-sm" onclick="copyReportText()">
-              Copy Plain Text
-            </button>
-          </div>
-        </div>
-
-        <!-- Device Summary Card -->
-        <div class="report-section">
-          <div class="report-section-title">Hardware Profile Summary</div>
-          <div class="report-device-info" id="report-device-info">
-            <div class="report-field">
-              <span class="report-field-label">Model: </span>
-              <span class="report-field-value" id="report-model">—</span>
-            </div>
-            <div class="report-field">
-              <span class="report-field-label">Serial Number: </span>
-              <span class="report-field-value mono" id="report-serial">—</span>
-            </div>
-            <div class="report-field">
-              <span class="report-field-label">Operating System: </span>
-              <span class="report-field-value" id="report-os">—</span>
-            </div>
-            <div class="report-field">
-              <span class="report-field-label">Processor: </span>
-              <span class="report-field-value" id="report-cpu">—</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Scan History Table -->
-        <div class="report-section">
-          <div class="report-section-title">Diagnostic History Log</div>
-          <div class="scan-history-list" id="scan-history-list">
-            <div class="empty-state">
-              <div class="empty-state-icon">📋</div>
-              <div>No scans recorded yet. Run a diagnostic scan to start logging your hardware telemetry timeline.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Health Timeline -->
-        <div class="report-section">
-          <div class="report-section-title">Health History Timeline</div>
-          <div class="health-timeline" id="health-timeline">
-            <div style="color: var(--text-muted); font-size: 13px;">Timeline will populate automatically as diagnostic scans run.</div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ===== SIDEBAR COLUMN ===== -->
-    <aside class="side-column">
-
-      <!-- System Specifications -->
-      <div class="specs-panel">
-        <div class="section-header">Device Specifications</div>
-        <div class="spec-list">
-          <div class="spec-item">
-            <span class="spec-label">Model</span>
-            <span class="spec-val" id="spec-model">Loading...</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Serial</span>
-            <span class="spec-val mono" id="spec-serial">Loading...</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Operating System</span>
-            <span class="spec-val" id="spec-os">Loading...</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Processor</span>
-            <span class="spec-val" id="spec-cpu">Loading...</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Memory</span>
-            <span class="spec-val" id="spec-ram">Loading...</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Device Type</span>
-            <span class="spec-val" id="spec-device-type">Detecting...</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Diagnostic Report Card -->
-      <div class="report-card">
-        <div class="report-card-tag">Diagnostic Report</div>
-        <div class="report-card-desc">Generate or export a diagnostic report of your device's health history for support escalation.</div>
-        <button class="report-card-link" onclick="switchTab('history')">
-          <span>View Diagnostic Report</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
+          <span class="tb-action-label">Remove viruses</span>
         </button>
       </div>
+    </nav>
 
-      <!-- Direct Support Ticket Button -->
-      <button class="btn btn-secondary" style="width:100%" onclick="openTicketModal()">
-        Submit Support Request
-      </button>
+  </header>
 
-    </aside>
-  </div>
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="app-main-content">
 
-  <!-- ===== FLOATING AVANTIS AGENT ASSISTANT BUTTON ===== -->
-  <div class="av-floating-assistant" id="floating-assistant-btn" onclick="toggleAssistantChat(event)" title="Avantis Support Assistant — Background monitoring active">
-    <div class="assistant-badge-dot"></div>
-    <img src="assets/avantis-icon.svg" alt="AV" class="assistant-btn-icon">
-  </div>
+    <!-- ==================== VIEW 1: HOME (SUMMARY & ACTIONS) ==================== -->
+    <section class="view-page active" id="view-home">
+      
+      <!-- Sub-Navigation (Summary / Actions) -->
+      <div class="sub-nav-bar">
+        <div class="sub-nav-tabs">
+          <button class="sub-tab-btn active" id="subtab-btn-summary" onclick="switchHomeSubTab('summary')">Summary</button>
+          <button class="sub-tab-btn" id="subtab-btn-actions" onclick="switchHomeSubTab('actions')">Actions</button>
+        </div>
+        <div class="last-scan-status-tag" id="summary-last-scan-meta">
+          <span class="live-dot-indicator"></span>
+          <span id="summary-meta-text">Last Completed Scan: Checking records...</span>
+        </div>
+      </div>
 
-  <!-- ===== AVANTIS ASSISTANT CHAT PANEL (ANCHORED BOTTOM-RIGHT) ===== -->
-  <div class="assistant-chat-panel" id="assistant-chat-panel" onclick="event.stopPropagation()">
-    <!-- 1. Header row: AV icon, title, active dot -->
-    <div class="chat-header">
-      <div class="chat-header-left">
-        <img src="assets/avantis-icon.svg" alt="AV" class="chat-header-avatar">
+      <!-- SUB-PANE A: SUMMARY (4 Outcome Tiles from Stored Scan) -->
+      <div class="sub-view-pane active" id="subpane-summary">
+        
+        <!-- 4 Outcome Tiles Row (Dev audit box removed!) -->
+        <div class="summary-tiles-row">
+          <!-- Tile 1: Software Updates Installed -->
+          <div class="outcome-tile-card">
+            <div class="outcome-tile-icon-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+              </svg>
+            </div>
+            <div class="outcome-tile-number" id="outcome-updates-installed">0</div>
+            <div class="outcome-tile-label">Software updates installed</div>
+          </div>
+
+          <!-- Tile 2: Drive Space Recovered -->
+          <div class="outcome-tile-card">
+            <div class="outcome-tile-icon-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+              </svg>
+            </div>
+            <div class="outcome-tile-number" id="outcome-space-recovered">0 GB</div>
+            <div class="outcome-tile-label">Drive space recovered</div>
+          </div>
+
+          <!-- Tile 3: Files Optimized -->
+          <div class="outcome-tile-card">
+            <div class="outcome-tile-icon-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <div class="outcome-tile-number" id="outcome-files-optimized">0</div>
+            <div class="outcome-tile-label">Files optimized</div>
+          </div>
+
+          <!-- Tile 4: Virus & Malware Removed -->
+          <div class="outcome-tile-card">
+            <div class="outcome-tile-icon-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <polyline points="9 12 11 14 15 10"></polyline>
+              </svg>
+            </div>
+            <div class="outcome-tile-number" id="outcome-threats-removed">0</div>
+            <div class="outcome-tile-label">Virus & malware removed</div>
+          </div>
+        </div>
+
+        <!-- First-Scan Prompt Banner (Only shown if 0 reports found) -->
+        <div class="summary-empty-banner" id="summary-first-run-prompt" style="display:none;">
+          <p style="margin-bottom:8px; font-weight:600;">No full system scans have been performed on this PC yet.</p>
+          <button type="button" class="btn-primary" onclick="switchHomeSubTab('actions')">Run your first scan</button>
+        </div>
+
+      </div>
+
+      <!-- SUB-PANE B: ACTIONS (6 Run Cards) -->
+      <div class="sub-view-pane" id="subpane-actions">
+        <div class="actions-grid">
+          
+          <!-- Card 1: Full System Scan -->
+          <div class="action-card" id="act-card-fullscan">
+            <div>
+              <div class="action-card-header">
+                <div class="action-card-title-group">
+                  <div class="action-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <circle cx="12" cy="12" r="4"></circle>
+                    </svg>
+                  </div>
+                  <span class="action-card-name">Full System Scan</span>
+                </div>
+                <span class="badge-status badge-PASS" id="badge-act-fullscan">PASS</span>
+              </div>
+              <div class="action-card-desc">Runs sequential 5-stage automated maintenance: Hardware, Threat scan, Driver updates, File cleanup, and Network stack reset.</div>
+            </div>
+            <div class="action-card-footer">
+              <span class="action-last-run" id="last-run-fullscan">Last run: --</span>
+              <button type="button" class="btn-run-action" id="btn-run-fullscan" onclick="triggerActionRun('fullscan')">
+                <span>Run</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 2: Update Drivers -->
+          <div class="action-card" id="act-card-drivers">
+            <div>
+              <div class="action-card-header">
+                <div class="action-card-title-group">
+                  <div class="action-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                    </svg>
+                  </div>
+                  <span class="action-card-name">Update Drivers</span>
+                </div>
+                <span class="badge-status badge-PASS" id="badge-act-drivers">PASS</span>
+              </div>
+              <div class="action-card-desc">Matches Plug-and-Play hardware IDs against verified Avantis catalog with automated restore point creation.</div>
+            </div>
+            <div class="action-card-footer">
+              <span class="action-last-run" id="last-run-drivers">Last run: --</span>
+              <button type="button" class="btn-run-action" id="btn-run-drivers" onclick="triggerActionRun('drivers')">
+                <span>Run</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 3: Scan Hardware -->
+          <div class="action-card" id="act-card-scanhw">
+            <div>
+              <div class="action-card-header">
+                <div class="action-card-title-group">
+                  <div class="action-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="4" y="4" width="16" height="16"></rect>
+                      <rect x="9" y="9" width="6" height="6"></rect>
+                    </svg>
+                  </div>
+                  <span class="action-card-name">Scan Hardware</span>
+                </div>
+                <span class="badge-status badge-PASS" id="badge-act-scanhw">PASS</span>
+              </div>
+              <div class="action-card-desc">Read-only diagnostic audit of storage SMART health, thermal envelope, memory parity, and power metrics.</div>
+            </div>
+            <div class="action-card-footer">
+              <span class="action-last-run" id="last-run-scanhw">Last run: --</span>
+              <button type="button" class="btn-run-action" id="btn-run-scanhw" onclick="triggerActionRun('scanhw')">
+                <span>Run</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 4: Clean Up Files -->
+          <div class="action-card" id="act-card-cleanup">
+            <div>
+              <div class="action-card-header">
+                <div class="action-card-title-group">
+                  <div class="action-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                  </div>
+                  <span class="action-card-name">Clean Up Files</span>
+                </div>
+                <span class="badge-status badge-PASS" id="badge-act-cleanup">PASS</span>
+              </div>
+              <div class="action-card-desc">Purges temp files, update staging cache, and executes SSD ReTrim / HDD defragmentation volume optimization.</div>
+            </div>
+            <div class="action-card-footer">
+              <span class="action-last-run" id="last-run-cleanup">Last run: --</span>
+              <button type="button" class="btn-run-action" id="btn-run-cleanup" onclick="triggerActionRun('cleanup')">
+                <span>Run</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 5: Optimize Network -->
+          <div class="action-card" id="act-card-network">
+            <div>
+              <div class="action-card-header">
+                <div class="action-card-title-group">
+                  <div class="action-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                      <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                    </svg>
+                  </div>
+                  <span class="action-card-name">Optimize Network</span>
+                </div>
+                <span class="badge-status badge-PASS" id="badge-act-network">PASS</span>
+              </div>
+              <div class="action-card-desc">Flushes DNS cache, resets Winsock catalog and TCP/IP stack, and resolves network sleep degradation.</div>
+            </div>
+            <div class="action-card-footer">
+              <span class="action-last-run" id="last-run-network">Last run: --</span>
+              <button type="button" class="btn-run-action" id="btn-run-network" onclick="triggerActionRun('network')">
+                <span>Run</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 6: Threat Scan -->
+          <div class="action-card" id="act-card-threat">
+            <div>
+              <div class="action-card-header">
+                <div class="action-card-title-group">
+                  <div class="action-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                  </div>
+                  <span class="action-card-name">Threat Scan</span>
+                </div>
+                <span class="badge-status badge-PASS" id="badge-act-threat">PASS</span>
+              </div>
+              <div class="action-card-desc">Updates Windows Defender security definitions and executes malware scan with automated quarantine.</div>
+            </div>
+            <div class="action-card-footer">
+              <span class="action-last-run" id="last-run-threat">Last run: --</span>
+              <button type="button" class="btn-run-action" id="btn-run-threat" onclick="triggerActionRun('threat')">
+                <span>Run</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== VIEW 2: DISCOVER ==================== -->
+    <section class="view-page" id="view-discover">
+      <div class="detail-page-card">
+        <div class="detail-header-row">
+          <div>
+            <h2 class="detail-title">Discover Avantis PC Solutions</h2>
+            <p class="detail-desc">Hardware telemetry, warranty entitlement, official drivers, and OEM diagnostics for your Avantis PC.</p>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:18px; margin-top:16px;">
+          <div style="padding:18px; background:#f8fafc; border:1px solid #e2e8f0;">
+            <h3 style="font-size:14px; font-weight:800; margin-bottom:6px;">Official OEM Warranty</h3>
+            <p style="font-size:12.5px; color:var(--text-muted);">2-Year Comprehensive hardware and thermal envelope warranty coverage.</p>
+          </div>
+          <div style="padding:18px; background:#f8fafc; border:1px solid #e2e8f0;">
+            <h3 style="font-size:14px; font-weight:800; margin-bottom:6px;">Verified Drivers</h3>
+            <p style="font-size:12.5px; color:var(--text-muted);">Custom catalog built for Zimbabwe climate & power fluctuation resiliency.</p>
+          </div>
+          <div style="padding:18px; background:#f8fafc; border:1px solid #e2e8f0;">
+            <h3 style="font-size:14px; font-weight:800; margin-bottom:6px;">Proactive Telemetry</h3>
+            <p style="font-size:12.5px; color:var(--text-muted);">SMART disk predictive health warnings before drive failure occurs.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 3: SCAN HARDWARE (LIVE 2x2 TELEMETRY GRID) ==================== -->
+    <section class="view-page" id="view-scanhw">
+      <div class="telemetry-page-header">
+        <h2 class="telemetry-page-title">LIVE HARDWARE TELEMETRY</h2>
+      </div>
+
+      <!-- 2x2 Grid of Live Cards -->
+      <div class="telemetry-2x2-grid">
+        
+        <!-- Card 1: Processor -->
+        <div class="telemetry-card" id="tel-card-cpu">
+          <div class="tel-card-top">
+            <span class="tel-card-title">Processor</span>
+            <span class="tel-card-badge" id="tel-badge-cpu">--°C</span>
+          </div>
+          <div class="tel-card-value" id="tel-val-cpu">0%</div>
+          <div class="tel-progress-wrap">
+            <div class="tel-progress-bar" id="tel-bar-cpu" style="width: 0%;"></div>
+          </div>
+          <div class="tel-card-subtext" id="tel-sub-cpu">-- cores · Operating at --°C</div>
+        </div>
+
+        <!-- Card 2: Installed Memory -->
+        <div class="telemetry-card" id="tel-card-ram">
+          <div class="tel-card-top">
+            <span class="tel-card-title">Installed Memory</span>
+            <span class="tel-card-badge" id="tel-badge-ram">-- GB RAM</span>
+          </div>
+          <div class="tel-card-value" id="tel-val-ram">0%</div>
+          <div class="tel-progress-wrap">
+            <div class="tel-progress-bar" id="tel-bar-ram" style="width: 0%;"></div>
+          </div>
+          <div class="tel-card-subtext" id="tel-sub-ram">-- GB used of -- GB total</div>
+        </div>
+
+        <!-- Card 3: Primary Storage (C:) -->
+        <div class="telemetry-card" id="tel-card-storage">
+          <div class="tel-card-top">
+            <span class="tel-card-title">Primary Storage (C:)</span>
+            <span class="tel-card-badge" id="tel-badge-storage">SMART Passed</span>
+          </div>
+          <div class="tel-card-value" id="tel-val-storage">0%</div>
+          <div class="tel-progress-wrap">
+            <div class="tel-progress-bar" id="tel-bar-storage" style="width: 0%;"></div>
+          </div>
+          <div class="tel-card-subtext" id="tel-sub-storage">-- GB free of -- GB (SSD)</div>
+        </div>
+
+        <!-- Card 4: Power Supply (PSU) -->
+        <div class="telemetry-card" id="tel-card-power">
+          <div class="tel-card-top">
+            <span class="tel-card-title">Power Supply (PSU)</span>
+            <span class="tel-card-badge" id="tel-badge-power">AC Power</span>
+          </div>
+          <div class="tel-card-value" id="tel-val-power">AC Mains</div>
+          <div class="tel-progress-wrap">
+            <div class="tel-progress-bar" id="tel-bar-power" style="width: 100%;"></div>
+          </div>
+          <div class="tel-card-subtext" id="tel-sub-power">Connected to AC mains (Desktop / All-In-One)</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 4: UPDATE DRIVERS (PAGE) ==================== -->
+    <section class="view-page" id="view-drivers">
+      <div class="detail-page-card">
+        <div class="detail-header-row">
+          <div>
+            <h2 class="detail-title">Avantis Verified Driver Updates</h2>
+            <p class="detail-desc">Official verified hardware drivers matched by Hardware ID (VEN/DEV) for your specific Avantis model.</p>
+          </div>
+          <button type="button" class="btn-primary" id="btn-page-update-drivers" onclick="executeDriverUpdates()">Update Outdated Drivers</button>
+        </div>
+
+        <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:10px 14px; font-size:12.5px; color:#166534; margin-bottom:18px;">
+          <strong>[Safety Protection]</strong> A Windows System Restore Point is automatically created before any driver package is installed.
+        </div>
+
+        <div class="detail-table-wrap">
+          <table class="detail-table">
+            <thead>
+              <tr>
+                <th>Component</th>
+                <th>Device Name</th>
+                <th>Installed Version</th>
+                <th>Latest Verified</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="page-drivers-table-body">
+              <tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Querying PnP drivers...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 5: CLEAN UP FILES (PAGE) ==================== -->
+    <section class="view-page" id="view-cleanup">
+      <div class="detail-page-card">
+        <div class="detail-header-row">
+          <div>
+            <h2 class="detail-title">Avantis System Storage Cleanup & TRIM</h2>
+            <p class="detail-desc">Purges temporary files, update download staging caches, and optimizes drive blocks.</p>
+          </div>
+          <button type="button" class="btn-primary" onclick="executeCleanup()">Clean Files & Optimize Volume</button>
+        </div>
+
+        <div id="page-cleanup-breakdown" style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px;">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px 16px; margin-bottom:18px;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer;">
+            <input type="checkbox" id="page-cleanup-chk-recycle" style="width:16px; height:16px;" />
+            <span>Empty Windows Recycle Bin (User consent required for user-visible files)</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 6: OPTIMIZE NETWORK (PAGE) ==================== -->
+    <section class="view-page" id="view-network">
+      <div class="detail-page-card">
+        <div class="detail-header-row">
+          <div>
+            <h2 class="detail-title">Network Stack Optimization</h2>
+            <p class="detail-desc">Flushes DNS cache, resets Winsock catalog and TCP/IP stack, and resolves power management sleep.</p>
+          </div>
+          <button type="button" class="btn-primary" onclick="executeNetworkOptimization()">Optimize Network Stack</button>
+        </div>
+
+        <div id="page-network-results" style="margin-bottom:18px;">
+          <div style="padding:14px; background:#f8fafc; border:1px solid #e2e8f0; font-size:13px;">
+            <strong>Ready to optimize:</strong> Click the button above to run latency tests, flush DNS resolver, and reset socket catalogs.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 7: THREAT SCAN (PAGE) ==================== -->
+    <section class="view-page" id="view-threat">
+      <div class="detail-page-card">
+        <div class="detail-header-row">
+          <div>
+            <h2 class="detail-title">Windows Defender Threat Scan</h2>
+            <p class="detail-desc">Antivirus engine status, signature freshness, and automated threat quarantine.</p>
+          </div>
+          <button type="button" class="btn-primary" onclick="executeThreatScan()">Run Threat Scan Now</button>
+        </div>
+
+        <div id="page-threat-status-card" style="padding:14px; background:#f8fafc; border:1px solid #e2e8f0; font-size:13px; margin-bottom:18px;">
+          Querying Microsoft Defender status...
+        </div>
+
+        <div id="page-threat-detections-list"></div>
+      </div>
+    </section>
+
+    <!-- ==================== AUXILIARY VIEW: SUPPORT ==================== -->
+    <section class="view-page" id="view-support">
+      <div class="detail-page-card">
+        <h2 class="detail-title">Avantis Technical Support Center</h2>
+        <p class="detail-desc" style="margin-bottom:20px;">Submit a support ticket directly with live hardware diagnostic telemetry attached.</p>
+
+        <form onsubmit="handleSupportSubmit(event)" style="display:flex; flex-direction:column; gap:14px; max-width:540px;">
+          <div>
+            <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">Full Name</label>
+            <input type="text" id="supp-name" class="chat-input" placeholder="Your Name" required />
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">Email Address</label>
+            <input type="email" id="supp-email" class="chat-input" placeholder="name@company.com" required />
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">Issue Priority</label>
+            <select id="supp-priority" class="chat-input">
+              <option value="LOW">Low — General inquiry</option>
+              <option value="MEDIUM" selected>Medium — Performance degraded</option>
+              <option value="HIGH">High — Hardware anomaly detected</option>
+              <option value="CRITICAL">Critical — Hardware failure</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">Issue Description</label>
+            <textarea id="supp-issue" class="chat-input" rows="4" placeholder="Describe the issue you are experiencing..." required></textarea>
+          </div>
+          <button type="submit" class="btn-primary" style="align-self:flex-start;">Submit Ticket</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ==================== AUXILIARY VIEW: HISTORY ==================== -->
+    <section class="view-page" id="view-history">
+      <div class="detail-page-card">
+        <h2 class="detail-title">Diagnostic History & Health Timeline</h2>
+        <p class="detail-desc" style="margin-bottom:20px;">Complete history of diagnostic scans and health evaluations.</p>
+        <div id="page-history-list"></div>
+      </div>
+    </section>
+
+    <!-- ==================== AUXILIARY VIEW: SETTINGS ==================== -->
+    <section class="view-page" id="view-settings">
+      <div class="detail-page-card">
+        <h2 class="detail-title">Avantis PC Assist Settings</h2>
+        <p class="detail-desc" style="margin-bottom:20px;">Configure background monitoring and notification preferences.</p>
+        
+        <div style="padding:14px; background:#f8fafc; border:1px solid #e2e8f0; margin-bottom:14px;">
+          <strong>Version:</strong> Avantis PC Assist 2.4 · Product of Zimbabwe
+        </div>
+        <div style="padding:14px; background:#f8fafc; border:1px solid #e2e8f0;">
+          <strong>Native Notifications:</strong> Action Center toast notifications fire only when a new hardware issue is detected.
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== AVANTIS ASSISTANT FLOATING CHAT WIDGET ==================== -->
+  <div class="assistant-widget-container" id="assistant-widget-container">
+    <!-- AV Pill Button (Click to open chat) -->
+    <button type="button" class="assistant-pill-btn" id="assistant-pill-btn" onclick="toggleAssistantChat(event)">
+      <img src="assets/avantis_logo.png" alt="Avantis" class="av-icon-badge-img">
+      <span>Avantis Assistant</span>
+    </button>
+
+    <!-- Chat Panel -->
+    <div class="assistant-chat-panel" id="assistant-chat-panel" onclick="event.stopPropagation()">
+      <div class="chat-header">
         <span class="chat-header-title">Avantis Assistant</span>
+        <span style="font-size:11px; font-weight:700; color:var(--status-healthy);">Active</span>
       </div>
-      <div class="chat-header-status">
-        <span class="chat-status-dot"></span>
-        <span>Active</span>
+
+      <div class="chat-body" id="chat-messages-container">
+        <div class="chat-messages-list" id="chat-messages-list"></div>
       </div>
-    </div>
 
-    <!-- 2. Scrollable message area -->
-    <div class="chat-body" id="chat-messages-container">
-      <div class="chat-messages-list" id="chat-messages-list">
-        <!-- Rendered dynamically -->
-      </div>
-    </div>
-
-    <!-- 3. Bottom text input & send button -->
-    <form class="chat-input-bar" id="chat-input-form" onsubmit="handleChatSubmit(event)">
-      <input type="text" id="chat-input-field" class="chat-input" placeholder="Type a message or question..." autocomplete="off" />
-      <button type="submit" class="chat-send-btn" id="chat-send-btn" title="Send message">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="22" y1="2" x2="11" y2="13"></line>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-        </svg>
-      </button>
-    </form>
-  </div>
-
-  <!-- ===== FOOTER ===== -->
-  <footer class="app-footer">
-    <div class="footer-left">
-      <!-- Exact AVANTiS Wordmark Image Asset -->
-      <div class="avantis-brand-link">
-        <img src="assets/avantis-logo.svg" alt="AVANTiS - Product of Zimbabwe" class="avantis-logo-footer-img">
-      </div>
-    </div>
-    <div class="footer-right">v2.2 · Avantis Hardware Support & Diagnostics</div>
-  </footer>
-
-  <!-- ===== MODAL 1: SUPPORT TICKET ===== -->
-  <div class="modal-overlay" id="ticket-modal">
-    <div class="modal-card">
-      <h3 class="modal-title">Submit Technical Support Request</h3>
-      <p class="modal-desc">Describe your issue. Full hardware telemetry will be attached automatically.</p>
-      <form id="ticket-form" onsubmit="submitTicket(event)">
-        <div class="form-group">
-          <label class="form-label">Full Name</label>
-          <input type="text" id="cust-name" class="form-input" placeholder="e.g. Tendai Moyo" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Email Address</label>
-          <input type="email" id="cust-email" class="form-input" placeholder="tendai@company.co.zw" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Issue Description</label>
-          <textarea id="cust-issue" class="form-textarea" placeholder="What symptoms or error messages are you seeing?" required></textarea>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('ticket-modal')">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="btn-submit-tck">Submit Support Ticket</button>
-        </div>
+      <form class="chat-input-bar" id="chat-input-form" onsubmit="handleChatSubmit(event)">
+        <input type="text" id="chat-input-field" class="chat-input" placeholder="Type a question..." autocomplete="off" />
+        <button type="submit" class="chat-send-btn">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
       </form>
     </div>
   </div>
 
-  <!-- ===== MODAL 2: SYSTEM CLEANUP ===== -->
-  <div class="modal-overlay" id="cleanup-confirm-modal">
-    <div class="modal-card">
-      <h3 class="modal-title">Avantis System Cleanup</h3>
-      <p class="modal-desc" id="cleanup-confirm-msg">Scanning for temporary files and caches...</p>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-secondary" onclick="closeModal('cleanup-confirm-modal')">Cancel</button>
-        <button type="button" class="btn btn-primary" id="btn-confirm-cleanup" onclick="executeCleanup()">Clean Files Now</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== MODAL 4: QA CROSS-PRODUCT COMPATIBILITY CHECKLIST ===== -->
-  <div class="modal-overlay" id="qa-modal">
-    <div class="modal-card" style="max-width:600px;">
-      <h3 class="modal-title">Cross-Product QA Compatibility Matrix</h3>
-      <p class="modal-desc">Automated internal verification checklist for new Avantis hardware models.</p>
-      
-      <div style="display:flex; flex-direction:column; gap:8px; font-size:13px; margin-bottom:20px;" id="qa-checklist-items">
-        <div style="padding:8px 12px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; display:flex; justify-content:space-between;">
-          <span>✓ Dynamic Model & Serial Detection</span>
-          <strong id="qa-chk-model" style="color:var(--avantis-teal-cta)">Verified</strong>
-        </div>
-        <div style="padding:8px 12px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; display:flex; justify-content:space-between;">
-          <span>✓ Thermal Sensor & Graceful Degradation</span>
-          <strong id="qa-chk-temp" style="color:var(--avantis-teal-cta)">Supported</strong>
-        </div>
-        <div style="padding:8px 12px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; display:flex; justify-content:space-between;">
-          <span>✓ Power Mode (Battery vs AC PSU)</span>
-          <strong id="qa-chk-power" style="color:var(--avantis-teal-cta)">Auto-Adapted</strong>
-        </div>
-        <div style="padding:8px 12px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; display:flex; justify-content:space-between;">
-          <span>✓ Storage SMART & Sector Verification</span>
-          <strong id="qa-chk-storage" style="color:var(--avantis-teal-cta)">Active</strong>
-        </div>
-        <div style="padding:8px 12px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; display:flex; justify-content:space-between;">
-          <span>✓ Troubleshoot Subsystem Isolation</span>
-          <strong id="qa-chk-troubleshoot" style="color:var(--avantis-teal-cta)">Ready</strong>
-        </div>
-      </div>
-
-      <div class="modal-actions">
-        <button type="button" class="btn btn-primary" onclick="closeModal('qa-modal')">Done</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== MODAL 5: NOTIFICATION INFO ===== -->
+  <!-- Info Modal -->
   <div class="modal-overlay" id="info-modal">
     <div class="modal-card">
-      <h3 class="modal-title" id="info-modal-title">Notification</h3>
-      <p class="modal-desc" id="info-modal-msg"></p>
+      <h3 style="font-size:16px; font-weight:800; margin-bottom:8px;" id="info-modal-title">Notification</h3>
+      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:18px;" id="info-modal-msg"></p>
       <div class="modal-actions">
-        <button type="button" class="btn btn-primary" onclick="closeModal('info-modal')">OK</button>
+        <button type="button" class="btn-primary" onclick="closeModal('info-modal')">OK</button>
       </div>
     </div>
   </div>

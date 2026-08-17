@@ -22,3 +22,5 @@ Thumbs.db
 tmp/
 scratch/
 .gemini/
+reports/*.json
+!reports/.gitkeep

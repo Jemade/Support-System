@@ -1,7 +1,5 @@
-const { spawn } = require('child_process');
 const path = require('path');
-const fs = require('fs');
-const os = require('os');
+const { spawn } = require('child_process');
 
 class NotificationManager {
   constructor(options = {}) {
@@ -104,96 +102,40 @@ class NotificationManager {
   }
 
   /**
-   * Builds user-friendly plain-English microcopy and deep link URLs
+   * Builds clean, plain-English notification copy and deep link URLs
    */
   buildNotificationSummary(component, severity, alerts, diagnostics) {
     const componentParam = component === 'battery' ? 'power' : component;
     const launchUrl = `${this.clientUiUrl}/#troubleshoot?component=${componentParam}`;
 
-    switch (component) {
-      case 'cpu': {
-        const temp = diagnostics.cpu ? diagnostics.cpu.temperatureC : 85;
-        const load = diagnostics.cpu ? diagnostics.cpu.loadPercent : 90;
-        const isCrit = severity === 'CRITICAL' || temp >= 95;
-        return {
-          title: isCrit ? 'Avantis Alert: CPU Overheating' : 'Avantis Warning: High CPU Temperature',
-          message: isCrit
-            ? `CPU temperature reached ${temp}°C (${load}% load). Thermal throttling is active — check system ventilation.`
-            : `CPU temperature is elevated at ${temp}°C. Ensure air vents are unblocked and clear.`,
-          launchUrl,
-          component,
-          severity
-        };
-      }
+    if (alerts && alerts.length > 0) {
+      const topAlert = alerts[0];
+      const precautionNote = (topAlert.precautions && topAlert.precautions.length > 0)
+        ? ` ${topAlert.precautions[0]}`
+        : '';
 
-      case 'memory': {
-        const mem = diagnostics.memory || { usedPercent: 95, usedGB: 15.2, totalGB: 16 };
-        return {
-          title: 'Avantis Alert: High Memory Consumption',
-          message: `RAM usage reached ${mem.usedPercent}% (${mem.usedGB} GB of ${mem.totalGB} GB used). System performance may degrade.`,
-          launchUrl,
-          component,
-          severity
-        };
-      }
-
-      case 'storage': {
-        const storage = diagnostics.storage || { smartStatus: 'PASSED', reallocatedSectors: 12, freePercent: 4, freeGB: 20, totalGB: 512 };
-        if (storage.smartStatus === 'FAILING_NOW') {
-          return {
-            title: 'Avantis CRITICAL: Hard Drive SMART Failure',
-            message: 'Primary drive C: is reporting imminent hardware failure. Immediate data backup recommended.',
-            launchUrl,
-            component,
-            severity
-          };
-        }
-        if (storage.reallocatedSectors > 0) {
-          return {
-            title: 'Avantis Warning: Storage Health Degrading',
-            message: `Drive C: reported ${storage.reallocatedSectors} reallocated sectors. Drive health monitoring is active.`,
-            launchUrl,
-            component,
-            severity
-          };
-        }
-        return {
-          title: 'Avantis Alert: Low Storage Space',
-          message: `Primary drive C: has only ${storage.freePercent}% (${storage.freeGB} GB) free space remaining.`,
-          launchUrl,
-          component,
-          severity
-        };
-      }
-
-      case 'battery': {
-        const bat = diagnostics.battery || { healthPercent: 58, currentPercent: 80 };
-        const isCrit = severity === 'CRITICAL' || bat.healthPercent < 60;
-        return {
-          title: isCrit ? 'Avantis Alert: Battery Capacity Degraded' : 'Avantis Warning: Battery Health Wear',
-          message: isCrit
-            ? `Battery health has dropped to ${bat.healthPercent}% of original design capacity — consider a battery replacement.`
-            : `Battery health is at ${bat.healthPercent}% — showing noticeable capacity wear.`,
-          launchUrl,
-          component,
-          severity
-        };
-      }
-
-      default:
-        return {
-          title: 'Avantis Hardware Support Alert',
-          message: alerts[0] ? alerts[0].message : 'A hardware diagnostic alert requires your attention.',
-          launchUrl,
-          component,
-          severity
-        };
+      return {
+        title: topAlert.title || `Avantis Support: ${component.toUpperCase()} Alert`,
+        message: `${topAlert.message}${precautionNote}`,
+        launchUrl,
+        component,
+        severity: topAlert.severity || severity
+      };
     }
+
+    const isCrit = severity === 'CRITICAL';
+    return {
+      title: isCrit ? `Avantis Support: Critical ${component.toUpperCase()} Alert` : `Avantis Support: ${component.toUpperCase()} Warning`,
+      message: `A ${severity.toLowerCase()} condition was detected on your ${component} subsystem. Open Avantis Support to inspect details.`,
+      launchUrl,
+      component,
+      severity
+    };
   }
 
   /**
    * Dispatches a native Windows 10/11 Action Center toast notification
-   * using PowerShell and Windows.UI.Notifications WinRT.
+   * from the bottom-right corner using send_toast.ps1
    */
   sendWindowsToast({ title, message, launchUrl }) {
     this.notificationHistory.push({
@@ -203,56 +145,28 @@ class NotificationManager {
       sentAt: new Date().toISOString()
     });
 
-    const safeTitle = (title || 'Avantis Hardware Support').replace(/['"]/g, '');
-    const safeMessage = (message || '').replace(/['"]/g, '');
+    if (process.platform !== 'win32') return;
+
+    const scriptPath = path.join(__dirname, 'send_toast.ps1');
+    const safeTitle = title || 'Hardware Health Notification';
+    const safeMessage = message || '';
     const safeUrl = launchUrl || this.clientUiUrl;
-
-    const psScript = `
-try {
-  [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
-  [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null
-
-  $xmlTemplate = @"
-<toast activationType="protocol" launch="${safeUrl}">
-  <visual>
-    <binding template="ToastGeneric">
-      <text>${safeTitle}</text>
-      <text>${safeMessage}</text>
-      <text placement="attribution">Avantis Hardware Support</text>
-    </binding>
-  </visual>
-  <actions>
-    <action content="Open Troubleshoot" activationType="protocol" arguments="${safeUrl}" />
-  </actions>
-</toast>
-"@
-
-  $xml = New-Object Windows.Data.Xml.Dom.XmlDocument
-  $xml.LoadXml($xmlTemplate)
-  $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
-  
-  # Use PowerShell standard AppID for reliable Action Center toast display on Windows 10 & 11
-  $appId = '{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\\WindowsPowerShell\\v1.0\\powershell.exe'
-  [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($appId).Show($toast)
-} catch {
-  # Fallback to NotifyIcon balloon if WinRT toast is restricted in environment
-  Add-Type -AssemblyName System.Windows.Forms
-  $notify = New-Object System.Windows.Forms.NotifyIcon
-  $notify.Icon = [System.Drawing.SystemIcons]::Warning
-  $notify.BalloonTipTitle = "${safeTitle}"
-  $notify.BalloonTipText = "${safeMessage}"
-  $notify.Visible = $True
-  $notify.ShowBalloonTip(5000)
-}
-`;
 
     try {
       const psProcess = spawn('powershell.exe', [
         '-NoProfile',
         '-ExecutionPolicy',
         'Bypass',
-        '-Command',
-        psScript
+        '-File',
+        scriptPath,
+        '-AppTitle',
+        'Avantis Support',
+        '-Title',
+        safeTitle,
+        '-Message',
+        safeMessage,
+        '-Url',
+        safeUrl
       ], {
         windowsHide: true,
         detached: true,
@@ -265,7 +179,7 @@ try {
   }
 
   /**
-   * Reset tracking state (useful for test resets or user manual reset)
+   * Reset tracking state
    */
   resetState() {
     this.lastKnownSignals = {

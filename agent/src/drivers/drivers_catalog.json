@@ -1,0 +1,50 @@
+[
+  {
+    "hardware_id": "VEN_8086&DEV_2723",
+    "device_name": "Intel Wi-Fi 6 AX200 160MHz",
+    "component": "Network & WLAN",
+    "latest_version": "23.50.0.8",
+    "download_url": "\\\\avantis-fileserver\\drivers\\wifi\\Intel_AX200_23.50.0.exe",
+    "install_args": "/S /qn /norestart"
+  },
+  {
+    "hardware_id": "VEN_8086&DEV_4DF0",
+    "device_name": "Intel Wi-Fi 6 AX201 160MHz",
+    "component": "Network & WLAN",
+    "latest_version": "23.50.0.8",
+    "download_url": "\\\\avantis-fileserver\\drivers\\wifi\\Intel_AX201_23.50.0.exe",
+    "install_args": "/S /qn /norestart"
+  },
+  {
+    "hardware_id": "VEN_10EC&DEV_8168",
+    "device_name": "Realtek PCIe GbE Family Controller",
+    "component": "Ethernet LAN",
+    "latest_version": "10.68.815.2023",
+    "download_url": "\\\\avantis-fileserver\\drivers\\lan\\Realtek_GbE_10.68.exe",
+    "install_args": "/s /v\"/qn\""
+  },
+  {
+    "hardware_id": "VEN_10EC&DEV_0256",
+    "device_name": "Realtek High Definition Audio",
+    "component": "Audio Subsystem",
+    "latest_version": "6.0.9285.1",
+    "download_url": "\\\\avantis-fileserver\\drivers\\audio\\Realtek_Audio_6.0.9285.exe",
+    "install_args": "/s"
+  },
+  {
+    "hardware_id": "VEN_8086&DEV_9BC4",
+    "device_name": "Intel UHD Graphics 630 / Iris Xe",
+    "component": "Display Graphics",
+    "latest_version": "31.0.101.5186",
+    "download_url": "\\\\avantis-fileserver\\drivers\\gfx\\Intel_Graphics_31.0.101.exe",
+    "install_args": "-s -norestart"
+  },
+  {
+    "hardware_id": "ACPI\\VEN_AVNT&DEV_0001",
+    "device_name": "Avantis System Motherboard Firmware (UEFI)",
+    "component": "System BIOS / UEFI",
+    "latest_version": "1.08.0",
+    "download_url": "\\\\avantis-fileserver\\drivers\\bios\\Avantis_UEFI_1.08.0.exe",
+    "install_args": "/SILENT"
+  }
+]
